@@ -18,12 +18,6 @@ class HomeMenuItem {
 class HomeScreenModel {
   final List<HomeMenuItem> menuItems = [
     HomeMenuItem(
-      title: 'Experiment',
-      description: 'Interactive scenarios',
-      routeName: '/experiment',
-      icon: Icons.science,
-    ),
-    HomeMenuItem(
       title: 'Compare',
       description: 'Compare consent models',
       routeName: '/compare',
