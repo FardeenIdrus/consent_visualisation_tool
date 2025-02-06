@@ -25,35 +25,51 @@ class SimulationModel {
   List<SimulationMessage> messages = [];
   ConsentModel? currentModel;
   Timer? _expiryTimer;
+  final _messageController = StreamController<List<SimulationMessage>>.broadcast();
 
   SimulationModel() {
-    // Start a timer to check for expired messages every minute
-    _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    // Check for expired messages more frequently (every second)
+    _expiryTimer = Timer.periodic(Duration(seconds: 1), (_) {
       _checkExpiredMessages();
     });
   }
 
+  Stream<List<SimulationMessage>> get messageStream => _messageController.stream;
+
   void _checkExpiredMessages() {
+    bool hasExpired = false;
     final now = DateTime.now();
+    
     messages.removeWhere((message) {
-      if (message.additionalData?['timeLimit'] == true) {
-        final hours = message.additionalData!['timeLimitHours'] as int;
-        final expiryTime = message.timestamp.add(Duration(hours: hours));
-        return now.isAfter(expiryTime);
+      if (message.consentModel?.name == 'Granular Consent' &&
+          message.additionalData?['timeLimit'] == true) {
+        final minutes = message.additionalData!['timeLimitMinutes'] as int;
+        final expiryTime = message.timestamp.add(Duration(minutes: minutes));
+        final isExpired = now.isAfter(expiryTime);
+        if (isExpired) hasExpired = true;
+        return isExpired;
       }
       return false;
     });
+
+    // Notify listeners if any messages were removed
+    if (hasExpired) {
+      _messageController.add(messages);
+    }
   }
 
   void addMessage(SimulationMessage message) {
     messages.add(message);
+    _messageController.add(messages);
   }
 
   void clearMessages() {
     messages.clear();
+    _messageController.add(messages);
   }
 
   void dispose() {
     _expiryTimer?.cancel();
+    _messageController.close();
   }
 }

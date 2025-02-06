@@ -47,6 +47,24 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  String _getRemainingTime() {
+    if (message.consentModel?.name == 'Granular Consent' && 
+        message.additionalData?['timeLimit'] == true) {
+      final minutes = message.additionalData!['timeLimitMinutes'] as int;
+      final expiryTime = message.timestamp.add(Duration(minutes: minutes));
+      final remaining = expiryTime.difference(DateTime.now());
+      
+      if (remaining.isNegative) {
+        return 'Expired';
+      }
+      // Return just the number of seconds
+      return '${remaining.inSeconds}';
+    }
+    return '';
+  }
+
+
+
   Widget _buildConsentRequest(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(16),
@@ -90,7 +108,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+Widget _buildHeader() {
     bool isAwaitingConsent = message.consentModel?.name == 'Affirmative Consent' &&
                             message.additionalData?['requiresRecipientConsent'] == true;
     
@@ -118,6 +136,25 @@ class MessageBubble extends StatelessWidget {
 
 Widget _buildContent(BuildContext context) {
     if (message.type == MessageType.image) {
+      String timeRemaining = '';
+      bool isExpired = false;
+
+      // Only calculate time for sender and granular consent
+      if (!isReceiver && 
+          message.consentModel?.name == 'Granular Consent' && 
+          message.additionalData?['timeLimit'] == true) {
+        final minutes = message.additionalData!['timeLimitMinutes'] as int;
+        final expiryTime = message.timestamp.add(Duration(minutes: minutes));
+        final remaining = expiryTime.difference(DateTime.now());
+        
+        if (remaining.isNegative) {
+          timeRemaining = 'Expired';
+          isExpired = true;
+        } else {
+          timeRemaining = '${remaining.inSeconds}';
+        }
+      }
+
       return Container(
         constraints: BoxConstraints(maxWidth: 240),
         child: Stack(
@@ -126,11 +163,31 @@ Widget _buildContent(BuildContext context) {
               borderRadius: BorderRadius.circular(16),
               child: Image.memory(
                 message.imageData!,
-                width: 240,  // Set fixed width
-                height: 320,  // Set fixed height
+                width: 240,
+                height: 320,
                 fit: BoxFit.cover,
               ),
             ),
+            if (timeRemaining.isNotEmpty && !isReceiver)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    timeRemaining,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             if (isReceiver)
               Positioned(
                 bottom: 8,
@@ -165,7 +222,7 @@ Widget _buildContent(BuildContext context) {
       ),
       child: Text(
         message.content,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.black87,
           fontSize: 16,
         ),

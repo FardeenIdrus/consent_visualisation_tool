@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:consent_visualisation_tool/components/chat_input.dart';
 import 'package:consent_visualisation_tool/components/message_bubble.dart';
@@ -23,13 +24,21 @@ class _SimulationScreenState extends State<SimulationScreen> {
   final PageController _pageController = PageController();
   int _currentTabIndex = 0;
   final _messageController = TextEditingController();
-  
+  Timer? _countdownTimer;  // Add this
+
   @override
   void initState() {
     super.initState();
     _model = SimulationModel();
     _controller = SimulationController(_model, context);
     _model.currentModel = ConsentModelList.getAvailableModels().first;
+
+    // Add timer to refresh UI every second for countdown
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() {});  // Force UI refresh
+      }
+    });
   }
 
   @override
@@ -37,6 +46,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     _model.dispose();
     _pageController.dispose();
     _messageController.dispose();
+    _countdownTimer?.cancel();  // Clean up timer
     super.dispose();
   }
 
@@ -157,51 +167,58 @@ class _SimulationScreenState extends State<SimulationScreen> {
     );
   }
 
-  Widget _buildChatView({required bool isSender}) {
+Widget _buildChatView({required bool isSender}) {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            itemCount: _model.messages.length,
-            itemBuilder: (context, index) {
-              final message = _model.messages[index];
-              return MessageBubble(
-                message: message,
-                isReceiver: !isSender,
-                onConsentRequest: () async {
-                  final consentGranted = await showDialog<bool>(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => AffirmativeConsentDialog(isSender: false),
+          child: StreamBuilder<List<SimulationMessage>>(
+            stream: _model.messageStream,
+            initialData: _model.messages,
+            builder: (context, snapshot) {
+              final messages = snapshot.data ?? [];
+              return ListView.builder(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  return MessageBubble(
+                    message: message,
+                    isReceiver: !isSender,
+                    onConsentRequest: () async {
+                      final consentGranted = await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => AffirmativeConsentDialog(isSender: false),
+                      );
+                      
+                      if (consentGranted == true) {
+                        setState(() {
+                          message.additionalData?['requiresRecipientConsent'] = false;
+                        });
+                      }
+                    },
+                    canSave: message.additionalData?['allowSaving'] ?? true,
+                    canForward: message.additionalData?['allowForwarding'] ?? true,
+                    onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Content saved')),
+                    ),
+                    onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Content forwarded')),
+                    ),
                   );
-                  
-                  if (consentGranted == true) {
-                    setState(() {
-                      message.additionalData?['requiresRecipientConsent'] = false;
-                    });
-                  }
                 },
-                canSave: message.additionalData?['allowSaving'] ?? true,
-                canForward: message.additionalData?['allowForwarding'] ?? true,
-                onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Content saved')),
-                ),
-                onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Content forwarded')),
-                ),
               );
             },
           ),
         ),
         if (isSender)
-  ChatInput(
-    controller: _messageController,
-    onImagePick: _pickImage,
-    onSend: () => _handleSendMessage(_messageController.text),
-    pendingImage: _pendingImageBytes,  // Add this
-    onClearImage: () => setState(() => _pendingImageBytes = null),  // Add this
-  ),
+          ChatInput(
+            controller: _messageController,
+            onImagePick: _pickImage,
+            onSend: () => _handleSendMessage(_messageController.text),
+            pendingImage: _pendingImageBytes,
+            onClearImage: () => setState(() => _pendingImageBytes = null),
+          ),
       ],
     );
   }
