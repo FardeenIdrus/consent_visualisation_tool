@@ -26,13 +26,14 @@ class _CompareScreenState extends State<CompareScreen> {
         ? IconButton(
             icon: Icon(Icons.play_arrow),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) => SimulationScreen(
-                  models: selectedModels,
-                )
-              ));
+                  Navigator.push(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => const SimulationScreen()
+        )
+        );
             },
-            tooltip: 'View Simulation',
+            tooltip: 'View Simulation ',
           )
         : SizedBox.shrink();
     },
@@ -67,7 +68,7 @@ class _CompareScreenState extends State<CompareScreen> {
                 Navigator.push(
                   context, 
                   MaterialPageRoute(
-                    builder: (context) => SimulationScreen(models: selectedModels)
+                    builder: (context) => SimulationScreen()
                   )
                 );
               },
@@ -76,7 +77,7 @@ class _CompareScreenState extends State<CompareScreen> {
                 backgroundColor: AppTheme.primaryColor,
               ),
               child: const Text(
-                'View Simulation',
+                'View how these models would work in a chat interface',
                 style: TextStyle(color: Colors.white),)))
             ],
           );

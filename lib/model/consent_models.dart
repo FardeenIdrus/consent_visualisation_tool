@@ -14,6 +14,7 @@ class ConsentModel {
   });
 
   // Factory methods for each consent model
+
   factory ConsentModel.granular() {
     return ConsentModel(
       name: 'Granular Consent',
