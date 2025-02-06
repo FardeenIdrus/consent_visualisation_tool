@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:async';  // Add this import for Timer
 import 'package:consent_visualisation_tool/controller/simulation_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/model/simulation_model.dart';
@@ -20,6 +21,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
   Uint8List? _pendingImageBytes;
   final PageController _pageController = PageController();
   int _currentTabIndex = 0;
+  Timer? _refreshTimer;
   
   final List<ConsentModel> _availableModels = ConsentModelList.getAvailableModels();
 
@@ -29,6 +31,21 @@ class _SimulationScreenState extends State<SimulationScreen> {
     _model = SimulationModel();
     _controller = SimulationController(_model, context);
     _model.currentModel = _availableModels.first;
+
+    // Add timer to refresh UI for expiring messages
+    _refreshTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      if (mounted) {
+        setState(() {});  // Refresh UI to update time remaining displays
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _model.dispose();
+    _refreshTimer?.cancel();
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _handleSendMessage(String? text) async {
@@ -124,7 +141,117 @@ class _SimulationScreenState extends State<SimulationScreen> {
     });
   }
 }
+// For RecipientTab
+class _RecipientTab extends StatelessWidget {
+  final SimulationModel model;
 
+  const _RecipientTab({Key? key, required this.model}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: model.messages.length,
+      itemBuilder: (context, index) {
+        final message = model.messages[index];
+        return _buildMessageBubble(context, message);
+      },
+    );
+  }
+
+  Widget _buildMessageBubble(BuildContext context, SimulationMessage message) {
+    bool canSave = true;
+    bool canForward = true;
+
+    // Check permissions if it's a granular consent message
+    if (message.consentModel?.name == 'Granular Consent' && 
+        message.additionalData != null) {
+      canSave = message.additionalData!['allowSaving'] ?? false;
+      canForward = message.additionalData!['allowForwarding'] ?? false;
+    }
+
+    
+
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            message.consentModel?.name ?? 'Unknown Model',
+            style: TextStyle(fontSize: 10, color: Colors.grey),
+          ),
+          if (message.type == MessageType.image)
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    message.imageData!,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.save,
+                          color: canSave ? Colors.white : Colors.grey,
+                        ),
+                        onPressed: canSave
+                            ? () => _handleSave(context, message)
+                            : null,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.forward,
+                          color: canForward ? Colors.white : Colors.grey,
+                        ),
+                        onPressed: canForward
+                            ? () => _handleForward(context, message)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          else
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                message.content,
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _handleSave(BuildContext context, SimulationMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Content saved')),
+    );
+  }
+
+  void _handleForward(BuildContext context, SimulationMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Content forwarded')),
+    );
+  }
+}
+
+// For SenderTab
 class _SenderTab extends StatefulWidget {
   final SimulationModel model;
   final Function() onImagePicked;
@@ -152,8 +279,6 @@ class _SenderTabState extends State<_SenderTab> {
   void initState() {
     super.initState();
     _messageController = TextEditingController();
-    
-    // Set the initial model to Implied Consent
     widget.model.currentModel = ConsentModel.implied();
   }
 
@@ -263,15 +388,38 @@ class _SenderTabState extends State<_SenderTab> {
   }
 
   Widget _buildMessageBubble(SimulationMessage message) {
+    DateTime? expiryTime;
+    
+    if (message.consentModel?.name == 'Granular Consent' && 
+        message.additionalData != null) {
+      if (message.additionalData!['timeLimit'] == true) {
+        final minutes = message.additionalData!['timeLimitMinutes'] as int;
+        expiryTime = message.timestamp.add(Duration(minutes: minutes));
+      }
+    }
+
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       alignment: Alignment.centerRight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            message.consentModel?.name ?? 'Unknown Model',
-            style: TextStyle(fontSize: 10, color: Colors.grey),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                message.consentModel?.name ?? 'Unknown Model',
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+              if (expiryTime != null) ...[
+                SizedBox(width: 8),
+                Icon(Icons.timer, size: 12, color: Colors.grey),
+                Text(
+                  ' Expires in ${_formatTimeRemaining(expiryTime)}',
+                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+              ],
+            ],
           ),
           if (message.type == MessageType.image)
             ClipRRect(
@@ -299,60 +447,29 @@ class _SenderTabState extends State<_SenderTab> {
       ),
     );
   }
+
+  String _formatTimeRemaining(DateTime expiryTime) {
+    final remaining = expiryTime.difference(DateTime.now());
+    if (remaining.inMinutes > 0) {
+      return '${remaining.inMinutes}m';
+    } else if (remaining.inSeconds > 0) {
+      return '${remaining.inSeconds}s';
+    } else {
+      return 'expiring soon';
+    }
+  }
 }
 
-class _RecipientTab extends StatelessWidget {
-  final SimulationModel model;
-
-  const _RecipientTab({Key? key, required this.model}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: model.messages.length,
-      itemBuilder: (context, index) {
-        final message = model.messages[index];
-        return _buildMessageBubble(message);
-      },
+  void _handleSave(BuildContext context, SimulationMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Saving content...')),
     );
   }
 
-  Widget _buildMessageBubble(SimulationMessage message) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            message.consentModel?.name ?? 'Unknown Model',
-            style: TextStyle(fontSize: 10, color: Colors.grey),
-          ),
-          if (message.type == MessageType.image)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(
-                message.imageData!,
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
-            )
-          else
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                message.content,
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-        ],
-      ),
+  void _handleForward(BuildContext context, SimulationMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Forwarding content...')),
     );
   }
-}
+
 
