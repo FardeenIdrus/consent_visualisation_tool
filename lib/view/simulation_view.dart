@@ -1,5 +1,6 @@
 import 'dart:typed_data';
-import 'dart:async';  // Add this import for Timer
+import 'package:consent_visualisation_tool/components/chat_input.dart';
+import 'package:consent_visualisation_tool/components/message_bubble.dart';
 import 'package:consent_visualisation_tool/controller/simulation_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/model/simulation_model.dart';
@@ -21,106 +22,187 @@ class _SimulationScreenState extends State<SimulationScreen> {
   Uint8List? _pendingImageBytes;
   final PageController _pageController = PageController();
   int _currentTabIndex = 0;
-  Timer? _refreshTimer;
+  final _messageController = TextEditingController();
   
-  final List<ConsentModel> _availableModels = ConsentModelList.getAvailableModels();
-
   @override
   void initState() {
     super.initState();
     _model = SimulationModel();
     _controller = SimulationController(_model, context);
-    _model.currentModel = _availableModels.first;
-
-    // Add timer to refresh UI for expiring messages
-    _refreshTimer = Timer.periodic(Duration(seconds: 30), (_) {
-      if (mounted) {
-        setState(() {});  // Refresh UI to update time remaining displays
-      }
-    });
+    _model.currentModel = ConsentModelList.getAvailableModels().first;
   }
 
   @override
   void dispose() {
     _model.dispose();
-    _refreshTimer?.cancel();
     _pageController.dispose();
+    _messageController.dispose();
     super.dispose();
-  }
-
-  void _handleSendMessage(String? text) async {
-    final sent = await _controller.sendMessage(
-      text,
-      imageBytes: _pendingImageBytes,
-    );
-
-    if (sent) {
-      setState(() {
-        _pendingImageBytes = null;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Consent Simulation'),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
+      appBar: _buildAppBar(),
+      body: Column(
+        children: [
+          _buildConsentModelSelector(),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) => setState(() => _currentTabIndex = index),
+              children: [
+                _buildChatView(isSender: true),
+                _buildChatView(isSender: false),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text('Consent Simulation'),
+      elevation: 0,
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(48),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey[200]!,
+                width: 1,
+              ),
+            ),
+          ),
           child: Row(
             children: [
-              Expanded(child: _buildTabButton('Sender', 0)),
-              Expanded(child: _buildTabButton('Recipient', 1)),
+              _buildTabButton('Sender', 0),
+              _buildTabButton('Recipient', 1),
             ],
           ),
         ),
-      ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentTabIndex = index;
-          });
-        },
-        children: [
-          _SenderTab(
-            model: _model,
-            onImagePicked: _pickImage,
-            onClearChat: _clearChat,
-            pendingImageBytes: _pendingImageBytes,
-            onSendMessage: _handleSendMessage,
-          ),
-          _RecipientTab(model: _model),
-        ],
       ),
     );
   }
 
   Widget _buildTabButton(String text, int index) {
     final isSelected = _currentTabIndex == index;
-    return GestureDetector(
-      onTap: () {
-        _pageController.animateToPage(
+    return Expanded(
+      child: InkWell(
+        onTap: () => _pageController.animateToPage(
           index,
           duration: Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.transparent,
         ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                width: 2,
+              ),
+            ),
+          ),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? AppTheme.primaryColor : Colors.grey,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildConsentModelSelector() {
+    final models = ConsentModelList.getAvailableModels();
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 2),
+            blurRadius: 6,
+            color: Colors.black.withOpacity(0.1),
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<String>(
+        value: _model.currentModel?.name,
+        decoration: InputDecoration(
+          labelText: 'Consent Model',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        items: models.map((model) => DropdownMenuItem(
+          value: model.name,
+          child: Text(model.name),
+        )).toList(),
+        onChanged: (name) {
+          if (name != null) {
+            setState(() {
+              _model.currentModel = models.firstWhere((m) => m.name == name);
+            });
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildChatView({required bool isSender}) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            itemCount: _model.messages.length,
+            itemBuilder: (context, index) {
+              final message = _model.messages[index];
+              return MessageBubble(
+                message: message,
+                isReceiver: !isSender,
+                onConsentRequest: () async {
+                  final consentGranted = await showDialog<bool>(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => AffirmativeConsentDialog(isSender: false),
+                  );
+                  
+                  if (consentGranted == true) {
+                    setState(() {
+                      message.additionalData?['requiresRecipientConsent'] = false;
+                    });
+                  }
+                },
+                canSave: message.additionalData?['allowSaving'] ?? true,
+                canForward: message.additionalData?['allowForwarding'] ?? true,
+                onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Content saved')),
+                ),
+                onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Content forwarded')),
+                ),
+              );
+            },
+          ),
+        ),
+        if (isSender)
+  ChatInput(
+    controller: _messageController,
+    onImagePick: _pickImage,
+    onSend: () => _handleSendMessage(_messageController.text),
+    pendingImage: _pendingImageBytes,  // Add this
+    onClearImage: () => setState(() => _pendingImageBytes = null),  // Add this
+  ),
+      ],
     );
   }
 
@@ -128,348 +210,25 @@ class _SimulationScreenState extends State<SimulationScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
+      setState(() => _pendingImageBytes = bytes);
+    }
+  }
+
+  Future<void> _handleSendMessage(String text) async {
+    if (text.isEmpty && _pendingImageBytes == null) return;
+
+    final sent = await _controller.sendMessage(
+      text.isNotEmpty ? text : null,
+      imageBytes: _pendingImageBytes,
+    );
+
+    if (sent) {
       setState(() {
-        _pendingImageBytes = bytes;
+        _messageController.clear();
+        _pendingImageBytes = null;
       });
     }
   }
-
-  void _clearChat() {
-    setState(() {
-      _model.clearMessages();
-      _pendingImageBytes = null;
-    });
-  }
 }
-// For RecipientTab
-class _RecipientTab extends StatelessWidget {
-  final SimulationModel model;
-
-  const _RecipientTab({Key? key, required this.model}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: model.messages.length,
-      itemBuilder: (context, index) {
-        final message = model.messages[index];
-        return _buildMessageBubble(context, message);
-      },
-    );
-  }
-
-  Widget _buildMessageBubble(BuildContext context, SimulationMessage message) {
-    bool canSave = true;
-    bool canForward = true;
-
-    // Check permissions if it's a granular consent message
-    if (message.consentModel?.name == 'Granular Consent' && 
-        message.additionalData != null) {
-      canSave = message.additionalData!['allowSaving'] ?? false;
-      canForward = message.additionalData!['allowForwarding'] ?? false;
-    }
-
-    
-
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            message.consentModel?.name ?? 'Unknown Model',
-            style: TextStyle(fontSize: 10, color: Colors.grey),
-          ),
-          if (message.type == MessageType.image)
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    message.imageData!,
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.save,
-                          color: canSave ? Colors.white : Colors.grey,
-                        ),
-                        onPressed: canSave
-                            ? () => _handleSave(context, message)
-                            : null,
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.forward,
-                          color: canForward ? Colors.white : Colors.grey,
-                        ),
-                        onPressed: canForward
-                            ? () => _handleForward(context, message)
-                            : null,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          else
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                message.content,
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _handleSave(BuildContext context, SimulationMessage message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Content saved')),
-    );
-  }
-
-  void _handleForward(BuildContext context, SimulationMessage message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Content forwarded')),
-    );
-  }
-}
-
-// For SenderTab
-class _SenderTab extends StatefulWidget {
-  final SimulationModel model;
-  final Function() onImagePicked;
-  final Function() onClearChat;
-  final Function(String?) onSendMessage;
-  final Uint8List? pendingImageBytes;
-
-  const _SenderTab({
-    Key? key,
-    required this.model,
-    required this.onImagePicked,
-    required this.onClearChat,
-    required this.pendingImageBytes,
-    required this.onSendMessage,
-  }) : super(key: key);
-
-  @override
-  _SenderTabState createState() => _SenderTabState();
-}
-
-class _SenderTabState extends State<_SenderTab> {
-  late TextEditingController _messageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _messageController = TextEditingController();
-    widget.model.currentModel = ConsentModel.implied();
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final availableModels = ConsentModelList.getAvailableModels();
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: DropdownButton<String>(
-                  value: widget.model.currentModel?.name,
-                  isExpanded: true,
-                  items: availableModels.map((modelOption) {
-                    return DropdownMenuItem(
-                      value: modelOption.name,
-                      child: Text(modelOption.name),
-                    );
-                  }).toList(),
-                  onChanged: (selectedModelName) {
-                    if (selectedModelName != null) {
-                      setState(() {
-                        final selectedModel = availableModels.firstWhere(
-                          (model) => model.name == selectedModelName
-                        );
-                        widget.model.currentModel = selectedModel;
-                      });
-                    }
-                  },
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: widget.onClearChat,
-                tooltip: 'Clear Chat',
-              ),
-            ],
-          ),
-        ),
-
-        Expanded(
-          child: ListView.builder(
-            itemCount: widget.model.messages.length,
-            itemBuilder: (context, index) {
-              final message = widget.model.messages[index];
-              return _buildMessageBubble(message);
-            },
-          ),
-        ),
-
-        if (widget.pendingImageBytes != null)
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              Image.memory(
-                widget.pendingImageBytes!,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-              ),
-              IconButton(
-                icon: Icon(Icons.close, color: Colors.red),
-                onPressed: widget.onClearChat,
-              ),
-            ],
-          ),
-
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.image),
-              onPressed: widget.onImagePicked,
-            ),
-            Expanded(
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Enter message',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.send),
-              onPressed: () {
-                final text = _messageController.text;
-                widget.onSendMessage(text.isNotEmpty ? text : null);
-                _messageController.clear();
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMessageBubble(SimulationMessage message) {
-    DateTime? expiryTime;
-    
-    if (message.consentModel?.name == 'Granular Consent' && 
-        message.additionalData != null) {
-      if (message.additionalData!['timeLimit'] == true) {
-        final minutes = message.additionalData!['timeLimitMinutes'] as int;
-        expiryTime = message.timestamp.add(Duration(minutes: minutes));
-      }
-    }
-
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      alignment: Alignment.centerRight,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                message.consentModel?.name ?? 'Unknown Model',
-                style: TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-              if (expiryTime != null) ...[
-                SizedBox(width: 8),
-                Icon(Icons.timer, size: 12, color: Colors.grey),
-                Text(
-                  ' Expires in ${_formatTimeRemaining(expiryTime)}',
-                  style: TextStyle(fontSize: 10, color: Colors.grey),
-                ),
-              ],
-            ],
-          ),
-          if (message.type == MessageType.image)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(
-                message.imageData!,
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
-            )
-          else
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                message.content,
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  String _formatTimeRemaining(DateTime expiryTime) {
-    final remaining = expiryTime.difference(DateTime.now());
-    if (remaining.inMinutes > 0) {
-      return '${remaining.inMinutes}m';
-    } else if (remaining.inSeconds > 0) {
-      return '${remaining.inSeconds}s';
-    } else {
-      return 'expiring soon';
-    }
-  }
-}
-
-  void _handleSave(BuildContext context, SimulationMessage message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Saving content...')),
-    );
-  }
-
-  void _handleForward(BuildContext context, SimulationMessage message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Forwarding content...')),
-    );
-  }
 
 

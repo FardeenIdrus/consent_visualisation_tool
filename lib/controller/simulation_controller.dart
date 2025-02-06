@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/model/simulation_model.dart';
 import 'package:flutter/material.dart';
 
@@ -25,17 +24,40 @@ class SimulationController {
         
         return _addMessage(text, imageBytes, additionalData: settings);
 
-      case 'Informed Consent':
-        // Implement informed consent dialog
-        return _addMessage(text, imageBytes);
+        case 'Informed Consent':
+      final acknowledged = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => InformedConsentDialog(),
+      );
+
+      // If acknowledged is null or false, user cancelled or did not acknowledge risks
+      if (acknowledged != true) return false;
+
+      return _addMessage(text, imageBytes);
 
       case 'Dynamic Consent':
         // Implement dynamic consent dialog
         return _addMessage(text, imageBytes);
 
       case 'Affirmative Consent':
-        // Implement affirmative consent dialog
-        return _addMessage(text, imageBytes);
+        // First get sender's explicit consent
+        final senderConsent = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const AffirmativeConsentDialog(isSender: true),
+        );
+
+        // If sender didn't consent, cancel sending
+        if (senderConsent != true) return false;
+
+        // Add message with pending recipient consent flag
+        return _addMessage(
+          text,
+          imageBytes,
+          additionalData: {'requiresRecipientConsent': true}
+        );
+
 
       case 'Implied Consent':
         return _addMessage(text, imageBytes);
@@ -59,24 +81,114 @@ class SimulationController {
   }
 }
 class InformedConsentDialog extends StatelessWidget {
+  const InformedConsentDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Informed Consent'),
-      content: Text('This is an informed consent dialog.'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Before sending this message, please review the potential risks:',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '1. Risk of data being shared with third parties.\n'
+              '2. Risk of data being stored indefinitely.\n'
+              '3. Risk of data being used for unintended purposes.\n',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'By clicking "I understand the risks", you acknowledge these risks and agree to proceed.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+          ],
+        ),
+      ),
       actions: [
         TextButton(
-          child: Text('OK'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(false), // Cancel
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true), // Acknowledge
+          child: const Text('I understand the risks'),
         ),
       ],
     );
   }
 }
-class GranularConsentDialog extends StatefulWidget {
+
+class AffirmativeConsentDialog extends StatelessWidget {
+  final bool isSender;
+  
+  const AffirmativeConsentDialog({super.key, required this.isSender});
+
   @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(isSender ? 'Request to Share Image' : 'Request to View Image'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isSender 
+                ? 'Do you explicitly agree to share this image?' 
+                : 'A user wants to share an image with you. Do you explicitly agree to view it?',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 16),
+            // Building upon informed consent by providing clear information
+            Text(
+              'By agreeing, you acknowledge:',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isSender
+                ? '• The image will be shared with the recipient\n'
+                  '• You have the right to revoke consent\n'
+                  '• You have willingly chosen to share this content'
+                : '• You will receive an image from the sender\n'
+                  '• You can decline to view the content\n'
+                  '• You are under no obligation to agree',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('No, I Do Not Agree'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Yes, I Explicitly Agree'),
+        ),
+      ],
+    );
+  }
+}
+
+
+class GranularConsentDialog extends StatefulWidget {
+  const GranularConsentDialog({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
   _GranularConsentDialogState createState() => _GranularConsentDialogState();
 }
 

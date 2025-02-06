@@ -28,7 +28,7 @@ class SimulationModel {
 
   SimulationModel() {
     // Start a timer to check for expired messages every minute
-    _expiryTimer = Timer.periodic(Duration(minutes: 1), (_) {
+    _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _checkExpiredMessages();
     });
   }
