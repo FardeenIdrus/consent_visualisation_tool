@@ -12,6 +12,7 @@ class MessageBubble extends StatelessWidget {
   final bool canForward;
   final Function(BuildContext) onSave;
   final Function(BuildContext) onForward;
+  final Function(BuildContext)? onDelete;  // Add this
 
   const MessageBubble({
     Key? key,
@@ -22,6 +23,7 @@ class MessageBubble extends StatelessWidget {
     this.canForward = true,
     required this.onSave,
     required this.onForward,
+    this.onDelete,  // Add this
   }) : super(key: key);
 
   @override
@@ -135,102 +137,119 @@ Widget _buildHeader() {
   }
 
 Widget _buildContent(BuildContext context) {
-    if (message.type == MessageType.image) {
-      String timeRemaining = '';
-      bool isExpired = false;
+  if (message.type == MessageType.image) {
+    bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
+    bool canDelete = message.additionalData?['allowDeletion'] == true;
+    String timeRemaining = '';
+    bool isExpired = false;
 
-      // Only calculate time for sender and granular consent
-      if (!isReceiver && 
-          message.consentModel?.name == 'Granular Consent' && 
-          message.additionalData?['timeLimit'] == true) {
-        final minutes = message.additionalData!['timeLimitMinutes'] as int;
-        final expiryTime = message.timestamp.add(Duration(minutes: minutes));
-        final remaining = expiryTime.difference(DateTime.now());
-        
-        if (remaining.isNegative) {
-          timeRemaining = 'Expired';
-          isExpired = true;
-        } else {
-          timeRemaining = '${remaining.inSeconds}';
-        }
+    if (message.consentModel?.name == 'Granular Consent' && 
+        message.additionalData?['timeLimit'] == true) {
+      final minutes = message.additionalData!['timeLimitMinutes'] as int;
+      final expiryTime = message.timestamp.add(Duration(minutes: minutes));
+      final remaining = expiryTime.difference(DateTime.now());
+      
+      if (remaining.isNegative) {
+        timeRemaining = 'Expired';
+        isExpired = true;
+      } else {
+        timeRemaining = '${remaining.inSeconds}';
       }
-
-      return Container(
-        constraints: BoxConstraints(maxWidth: 240),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.memory(
-                message.imageData!,
-                width: 240,
-                height: 320,
-                fit: BoxFit.cover,
-              ),
-            ),
-            if (timeRemaining.isNotEmpty && !isReceiver)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    timeRemaining,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-if (isReceiver)
-  Positioned(
-    bottom: 8,
-    right: 8,
-    child: Row(
-      children: [
-        _buildActionButton(
-          icon: Icons.save_rounded,
-          enabled: canSave,
-          onPressed: () => onSave(context),
-          label: 'Save',
-        ),
-        SizedBox(width: 8),
-        _buildActionButton(
-          icon: Icons.forward_rounded,
-          enabled: canForward,
-          onPressed: () => onForward(context),
-          label: 'Share',
-        ),
-      ],
-    ),
-  ),
-          ],
-        ),
-      );
     }
 
     return Container(
-      constraints: BoxConstraints(maxWidth: 280),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        message.content,
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 16,
-        ),
+      constraints: BoxConstraints(maxWidth: 240),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.memory(
+              message.imageData!,
+              width: 240,
+              height: 320,
+              fit: BoxFit.cover,
+            ),
+          ),
+          if (timeRemaining.isNotEmpty)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  timeRemaining,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          if (isReceiver || (isDynamicConsent && !isReceiver))
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isDynamicConsent && !isReceiver && canDelete)
+                    Container(
+                      margin: EdgeInsets.only(right: 8),
+                      child: _buildActionButton(
+                        icon: Icons.delete_outline,
+                        enabled: true,
+                        onPressed: () => onDelete?.call(context),
+                        label: 'Delete',
+                      ),
+                    ),
+                  if (isReceiver) ...[
+                    if (canSave)
+                      Container(
+                        margin: EdgeInsets.only(right: 8),
+                        child: _buildActionButton(
+                          icon: Icons.save_rounded,
+                          enabled: true,
+                          onPressed: () => onSave(context),
+                          label: 'Save',
+                        ),
+                      ),
+                    if (canForward)
+                      _buildActionButton(
+                        icon: Icons.forward_rounded,
+                        enabled: true,
+                        onPressed: () => onForward(context),
+                        label: 'Forward',
+                      ),
+                  ],
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
+
+  return Container(
+    constraints: BoxConstraints(maxWidth: 280),
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Text(
+      message.content,
+      style: TextStyle(
+        color: Colors.black87,
+        fontSize: 16,
+      ),
+    ),
+  );
+}
 
 Widget _buildActionButton({
   required IconData icon,

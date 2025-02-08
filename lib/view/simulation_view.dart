@@ -24,19 +24,18 @@ class _SimulationScreenState extends State<SimulationScreen> {
   final PageController _pageController = PageController();
   int _currentTabIndex = 0;
   final _messageController = TextEditingController();
-  Timer? _countdownTimer;  // Add this
+  Timer? _countdownTimer;
 
   @override
   void initState() {
     super.initState();
-    _model = SimulationModel();
+    _model = SimulationModel(context);
     _controller = SimulationController(_model, context);
     _model.currentModel = ConsentModelList.getAvailableModels().first;
 
-    // Add timer to refresh UI every second for countdown
     _countdownTimer = Timer.periodic(Duration(seconds: 1), (_) {
       if (mounted) {
-        setState(() {});  // Force UI refresh
+        setState(() {});
       }
     });
   }
@@ -46,11 +45,11 @@ class _SimulationScreenState extends State<SimulationScreen> {
     _model.dispose();
     _pageController.dispose();
     _messageController.dispose();
-    _countdownTimer?.cancel();  // Clean up timer
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
-    void _clearChat() {
+  void _clearChat() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -160,64 +159,64 @@ class _SimulationScreenState extends State<SimulationScreen> {
     );
   }
 
-Widget _buildConsentModelSelector() {
-  final models = ConsentModelList.getAvailableModels();
-  return Container(
-    padding: EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      boxShadow: [
-        BoxShadow(
-          offset: Offset(0, 2),
-          blurRadius: 6,
-          color: Colors.black.withOpacity(0.1),
-        ),
-      ],
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: DropdownButtonFormField<String>(
-            value: _model.currentModel?.name,
-            decoration: InputDecoration(
-              labelText: 'Consent Model',
-              border: OutlineInputBorder(
+  Widget _buildConsentModelSelector() {
+    final models = ConsentModelList.getAvailableModels();
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            offset: Offset(0, 2),
+            blurRadius: 6,
+            color: Colors.black.withOpacity(0.1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: _model.currentModel?.name,
+              decoration: InputDecoration(
+                labelText: 'Consent Model',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              items: models.map((model) => DropdownMenuItem(
+                value: model.name,
+                child: Text(model.name),
+              )).toList(),
+              onChanged: (name) {
+                if (name != null) {
+                  setState(() {
+                    _model.currentModel = models.firstWhere((m) => m.name == name);
+                  });
+                }
+              },
+            ),
+          ),
+          SizedBox(width: 16),
+          ElevatedButton.icon(
+            icon: Icon(Icons.delete_outline, color: Colors.white),
+            label: Text('Clear Chat'),
+            onPressed: _clearChat,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            items: models.map((model) => DropdownMenuItem(
-              value: model.name,
-              child: Text(model.name),
-            )).toList(),
-            onChanged: (name) {
-              if (name != null) {
-                setState(() {
-                  _model.currentModel = models.firstWhere((m) => m.name == name);
-                });
-              }
-            },
           ),
-        ),
-        SizedBox(width: 16),
-        ElevatedButton.icon(
-          icon: Icon(Icons.delete_outline, color: Colors.white),
-          label: Text('Clear Chat'),
-          onPressed: _clearChat,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
-Widget _buildChatView({required bool isSender}) {
+  Widget _buildChatView({required bool isSender}) {
     return Column(
       children: [
         Expanded(
@@ -231,31 +230,37 @@ Widget _buildChatView({required bool isSender}) {
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[index];
+                  if (message.additionalData?['isVisible'] == false) {
+                    return Container();
+                  }
                   return MessageBubble(
-                    message: message,
-                    isReceiver: !isSender,
-                    onConsentRequest: () async {
-                      final consentGranted = await showDialog<bool>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => AffirmativeConsentDialog(isSender: false),
-                      );
-                      
-                      if (consentGranted == true) {
-                        setState(() {
-                          message.additionalData?['requiresRecipientConsent'] = false;
-                        });
-                      }
-                    },
-                    canSave: message.additionalData?['allowSaving'] ?? true,
-                    canForward: message.additionalData?['allowForwarding'] ?? true,
-                    onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Content saved')),
-                    ),
-                    onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Content forwarded')),
-                    ),
-                  );
+    message: message,
+    isReceiver: !isSender,
+    onConsentRequest: () async {
+      final consentGranted = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AffirmativeConsentDialog(isSender: false),
+      );
+      
+      if (consentGranted == true) {
+        setState(() {
+          message.additionalData?['requiresRecipientConsent'] = false;
+        });
+      }
+    },
+    canSave: message.additionalData?['allowSaving'] ?? true,
+    canForward: message.additionalData?['allowForwarding'] ?? true,
+    onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Content saved')),
+    ),
+    onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Content forwarded')),
+    ),
+    onDelete: message.consentModel?.name == 'Dynamic Consent' 
+      ? (context) => _controller.deleteMessage(message)
+      : null,
+  );
                 },
               );
             },
