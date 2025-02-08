@@ -1,28 +1,25 @@
-// lib/controller/home_screen_controller.dart
-import 'package:consent_visualisation_tool/model/home_model.dart';
-import 'package:consent_visualisation_tool/view/compare_view.dart';
+// lib/controller/home_controller.dart
 import 'package:flutter/material.dart';
-
+import '../model/home_model.dart';
+import '../view/compare_view.dart';
+import '../view/simulation_view.dart';
 
 class HomeController {
-  // Create an instance of HomeScreenModel
   final homeScreenModel = HomeScreenModel();
 
   void navigateToSection(BuildContext context, String routeName) {
     switch (routeName) {
-      // case '/experiment':
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => ExperimentScreen()),
-      //   );
-      //   break;
       case '/compare':
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => CompareScreen()),
         );
         break;
-      default:
+      case '/simulation':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SimulationScreen()),
+        );
         break;
     }
   }

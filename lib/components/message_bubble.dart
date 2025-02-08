@@ -35,7 +35,7 @@ class MessageBubble extends StatelessWidget {
     }
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       alignment: isReceiver ? Alignment.centerLeft : Alignment.centerRight,
       child: Column(
         crossAxisAlignment: isReceiver ? CrossAxisAlignment.start : CrossAxisAlignment.end,
@@ -67,8 +67,8 @@ class MessageBubble extends StatelessWidget {
 
   Widget _buildConsentRequest(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(16),
@@ -90,7 +90,7 @@ class MessageBubble extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           ElevatedButton.icon(
             icon: Icon(Icons.visibility),
             label: Text('View Image'),
@@ -180,7 +180,7 @@ Widget _buildContent(BuildContext context) {
                   ),
                   child: Text(
                     timeRemaining,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -188,26 +188,28 @@ Widget _buildContent(BuildContext context) {
                   ),
                 ),
               ),
-            if (isReceiver)
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Row(
-                  children: [
-                    _buildActionButton(
-                      icon: Icons.save_rounded,
-                      enabled: canSave,
-                      onPressed: () => onSave(context),
-                    ),
-                    SizedBox(width: 8),
-                    _buildActionButton(
-                      icon: Icons.forward_rounded,
-                      enabled: canForward,
-                      onPressed: () => onForward(context),
-                    ),
-                  ],
-                ),
-              ),
+if (isReceiver)
+  Positioned(
+    bottom: 8,
+    right: 8,
+    child: Row(
+      children: [
+        _buildActionButton(
+          icon: Icons.save_rounded,
+          enabled: canSave,
+          onPressed: () => onSave(context),
+          label: 'Save',
+        ),
+        SizedBox(width: 8),
+        _buildActionButton(
+          icon: Icons.forward_rounded,
+          enabled: canForward,
+          onPressed: () => onForward(context),
+          label: 'Share',
+        ),
+      ],
+    ),
+  ),
           ],
         ),
       );
@@ -222,7 +224,7 @@ Widget _buildContent(BuildContext context) {
       ),
       child: Text(
         message.content,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.black87,
           fontSize: 16,
         ),
@@ -230,26 +232,48 @@ Widget _buildContent(BuildContext context) {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required bool enabled,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black54,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        icon: Icon(icon, size: 20),
-        color: enabled ? Colors.white : Colors.grey[400],
-        onPressed: enabled ? onPressed : null,
-        constraints: BoxConstraints.tightFor(
-          width: 32,
-          height: 32,
+Widget _buildActionButton({
+  required IconData icon,
+  required bool enabled,
+  required VoidCallback onPressed,
+  required String label,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.black54,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Tooltip(
+      message: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onPressed : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: enabled ? Colors.white : Colors.grey[400],
+                ),
+                SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: enabled ? Colors.white : Colors.grey[400],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        padding: EdgeInsets.zero,
       ),
-    );
-  }
+    ),
+  );
+}
 }

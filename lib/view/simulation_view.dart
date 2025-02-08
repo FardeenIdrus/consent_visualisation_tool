@@ -50,6 +50,36 @@ class _SimulationScreenState extends State<SimulationScreen> {
     super.dispose();
   }
 
+    void _clearChat() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Clear Chat'),
+        content: Text('Are you sure you want to clear all messages?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _model.clearMessages();
+                _pendingImageBytes = null;
+              });
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,42 +160,62 @@ class _SimulationScreenState extends State<SimulationScreen> {
     );
   }
 
-  Widget _buildConsentModelSelector() {
-    final models = ConsentModelList.getAvailableModels();
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            offset: Offset(0, 2),
-            blurRadius: 6,
-            color: Colors.black.withOpacity(0.1),
-          ),
-        ],
-      ),
-      child: DropdownButtonFormField<String>(
-        value: _model.currentModel?.name,
-        decoration: InputDecoration(
-          labelText: 'Consent Model',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+Widget _buildConsentModelSelector() {
+  final models = ConsentModelList.getAvailableModels();
+  return Container(
+    padding: EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          offset: Offset(0, 2),
+          blurRadius: 6,
+          color: Colors.black.withOpacity(0.1),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            value: _model.currentModel?.name,
+            decoration: InputDecoration(
+              labelText: 'Consent Model',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            items: models.map((model) => DropdownMenuItem(
+              value: model.name,
+              child: Text(model.name),
+            )).toList(),
+            onChanged: (name) {
+              if (name != null) {
+                setState(() {
+                  _model.currentModel = models.firstWhere((m) => m.name == name);
+                });
+              }
+            },
           ),
         ),
-        items: models.map((model) => DropdownMenuItem(
-          value: model.name,
-          child: Text(model.name),
-        )).toList(),
-        onChanged: (name) {
-          if (name != null) {
-            setState(() {
-              _model.currentModel = models.firstWhere((m) => m.name == name);
-            });
-          }
-        },
-      ),
-    );
-  }
+        SizedBox(width: 16),
+        ElevatedButton.icon(
+          icon: Icon(Icons.delete_outline, color: Colors.white),
+          label: Text('Clear Chat'),
+          onPressed: _clearChat,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
 Widget _buildChatView({required bool isSender}) {
     return Column(
