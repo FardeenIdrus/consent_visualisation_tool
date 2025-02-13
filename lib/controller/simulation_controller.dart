@@ -123,52 +123,90 @@ class InformedConsentDialog extends StatefulWidget {
 }
 
 class _InformedConsentDialogState extends State<InformedConsentDialog> {
-  bool _understandRisks = false;
-  bool _understandStorage = false;
-  bool _understandSharing = false;
+  // Risk understanding checkboxes
+  bool _understandPermanence = false;
+  bool _understandDistribution = false;
+  bool _understandControlRisks = false;
+  bool _understandFutureImpact = false;
+  bool _understandSecurityRisks = false;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Informed Consent'),
+      title: Text(
+        'Informed Consent for Image Sharing',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       content: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Please review and acknowledge each aspect:',
-              style: Theme.of(context).textTheme.bodyLarge,
+              'Please carefully review and acknowledge the following risks:',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[800],
+              ),
             ),
             SizedBox(height: 16),
-            _buildCheckboxSection(
-              'Risk Understanding',
-              'Content can be stored indefinitely and potentially misused',
-              _understandRisks,
-              (value) => setState(() => _understandRisks = value!),
+            
+            // Risk Disclosure Sections
+            _buildRiskDisclosureSection(
+              title: 'Digital Permanence',
+              description: 'Once shared, images can persist indefinitely in digital spaces.',
+              value: _understandPermanence,
+              onChanged: (value) => setState(() => _understandPermanence = value!),
             ),
-            _buildCheckboxSection(
-              'Storage Understanding',
-              'Images may persist in digital form even after deletion',
-              _understandStorage,
-              (value) => setState(() => _understandStorage = value!),
+            
+            _buildRiskDisclosureSection(
+              title: 'Distribution Risks',
+              description: 'Images can be copied, saved, or redistributed without your direct control.',
+              value: _understandDistribution,
+              onChanged: (value) => setState(() => _understandDistribution = value!),
             ),
-            _buildCheckboxSection(
-              'Sharing Understanding',
-              'Once shared, content could be accessed by unintended parties',
-              _understandSharing,
-              (value) => setState(() => _understandSharing = value!),
+            
+            _buildRiskDisclosureSection(
+              title: 'Control Limitations',
+              description: 'You have limited ability to control the spread of shared images.',
+              value: _understandControlRisks,
+              onChanged: (value) => setState(() => _understandControlRisks = value!),
             ),
+            
+            _buildRiskDisclosureSection(
+              title: 'Future Impact',
+              description: 'Shared images may have long-term consequences for personal and professional life.',
+              value: _understandFutureImpact,
+              onChanged: (value) => setState(() => _understandFutureImpact = value!),
+            ),
+            
+            _buildRiskDisclosureSection(
+              title: 'Security Risks',
+              description: 'There is a potential for third-party interception or unauthorized access.',
+              value: _understandSecurityRisks,
+              onChanged: (value) => setState(() => _understandSecurityRisks = value!),
+            ),
+            
             SizedBox(height: 16),
+            
+            // Additional Information Section
             Text(
-              'Long-term implications:',
-              style: Theme.of(context).textTheme.titleSmall,
+              'Key Implications:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange,
+              ),
             ),
-            Text(
-              '• Digital content may be permanently stored\n'
-              '• Images could be copied or redistributed\n'
-              '• Future impact on personal/professional life',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                '• Images may be stored indefinitely\n'
+                '• Content can be shared without your explicit consent\n'
+                '• Potential future reputational risks',
+                style: TextStyle(
+                  color: Colors.grey[700],
+                ),
+              ),
             ),
           ],
         ),
@@ -179,34 +217,51 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
           child: Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _understandRisks && _understandStorage && _understandSharing
-              ? () => Navigator.of(context).pop(true)
-              : null,
+          onPressed: _allRisksAcknowledged()
+            ? () => Navigator.of(context).pop(true)
+            : null,
           child: Text('I Understand All Risks'),
         ),
       ],
     );
   }
 
-  Widget _buildCheckboxSection(
-    String title,
-    String description,
-    bool value,
-    Function(bool?) onChanged,
-  ) {
+  Widget _buildRiskDisclosureSection({
+    required String title,
+    required String description,
+    required bool value,
+    required Function(bool?) onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CheckboxListTile(
-          title: Text(title),
-          subtitle: Text(description),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+            ),
+          ),
+          subtitle: Text(
+            description,
+            style: TextStyle(color: Colors.grey[700]),
+          ),
           value: value,
           onChanged: onChanged,
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        Divider(),
+        Divider(height: 1),
       ],
     );
+  }
+
+  bool _allRisksAcknowledged() {
+    return _understandPermanence &&
+           _understandDistribution &&
+           _understandControlRisks &&
+           _understandFutureImpact &&
+           _understandSecurityRisks;
   }
 }
 
@@ -272,16 +327,14 @@ class DynamicConsentDialog extends StatefulWidget {
 }
 
 class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
-  late TextEditingController _hoursController;
-  late TextEditingController _minutesController;
-  int _hours = 24;
-  int _minutes = 0;
+  final TextEditingController _hoursController = TextEditingController();
+  final TextEditingController _minutesController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _hoursController = TextEditingController(text: _hours.toString());
-    _minutesController = TextEditingController(text: _minutes.toString());
+    _hoursController.text = '24'; // Default to 24 hours
+    _minutesController.text = '0';
   }
 
   @override
@@ -294,50 +347,49 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Dynamic Consent Settings'),
+      title: Text('Dynamic Consent Interval'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Set consent reconfirmation interval:'),
+          Text(
+            'Set how often you want to reconfirm consent',
+            style: TextStyle(color: Colors.grey[700]),
+          ),
           SizedBox(height: 16),
+          
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 100,
+              Expanded(
                 child: TextField(
                   controller: _hoursController,
-                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Hours',
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
-                    _hours = int.tryParse(value) ?? 0;
-                  },
+                  keyboardType: TextInputType.number,
                 ),
               ),
               SizedBox(width: 16),
-              SizedBox(
-                width: 100,
+              Expanded(
                 child: TextField(
                   controller: _minutesController,
-                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Minutes',
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
-                    _minutes = int.tryParse(value) ?? 0;
-                  },
+                  keyboardType: TextInputType.number,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 16),
           Text(
-            'Consent will be requested every $_hours hours and $_minutes minutes',
-            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            'Consent will be reconfirmed every '
+            '${_hoursController.text} hours and ${_minutesController.text} minutes',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
@@ -347,20 +399,24 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
           child: Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: () => Navigator.of(context).pop({
-            'consentIntervalHours': _hours,
-            'consentIntervalMinutes': _minutes,
-            'lastConsentTime': DateTime.now().toIso8601String(),
-            'allowDeletion': true,
-            'isVisible': true,
-          }),
+          onPressed: () {
+            final hours = int.tryParse(_hoursController.text) ?? 24;
+            final minutes = int.tryParse(_minutesController.text) ?? 0;
+            
+            Navigator.of(context).pop({
+              'consentIntervalHours': hours,
+              'consentIntervalMinutes': minutes,
+              'lastConsentTime': DateTime.now().toIso8601String(),
+              'allowDeletion': true,
+              'isVisible': true,
+            });
+          },
           child: Text('Confirm'),
         ),
       ],
     );
   }
 }
-
 class GranularConsentDialog extends StatefulWidget {
   const GranularConsentDialog({super.key});
 

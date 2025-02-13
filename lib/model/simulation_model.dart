@@ -64,6 +64,7 @@ class SimulationModel {
     }
   }
 
+
   void _checkDynamicConsent() async {
     for (var message in messages) {
       if (message.consentModel?.name == 'Dynamic Consent' &&
@@ -83,7 +84,20 @@ class SimulationModel {
             barrierDismissible: false,
             builder: (context) => AlertDialog(
               title: Text('Consent Reconfirmation'),
-              content: Text('Would you like to continue sharing this image?'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Would you like to continue sharing this image?'),
+                  SizedBox(height: 10),
+                  Text(
+                    'Last confirmed: ${lastConsentTime.toLocal()}',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
@@ -98,8 +112,10 @@ class SimulationModel {
           );
 
           if (confirmed == true) {
+            // Update last consent time
             message.additionalData!['lastConsentTime'] = DateTime.now().toIso8601String();
           } else {
+            // Hide message if consent is revoked
             message.additionalData!['isVisible'] = false;
           }
           _messageController.add(messages);
@@ -107,6 +123,7 @@ class SimulationModel {
       }
     }
   }
+
 
   void addMessage(SimulationMessage message) {
     messages.add(message);
