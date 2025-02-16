@@ -8,6 +8,7 @@ import 'package:consent_visualisation_tool/model/simulation_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
+import 'package:collection/collection.dart';
 
 class SimulationScreen extends StatefulWidget {
   const SimulationScreen({Key? key}) : super(key: key);
@@ -77,6 +78,69 @@ class _SimulationScreenState extends State<SimulationScreen> {
         ],
       ),
     );
+  }
+void _showImageRequestDialog(SimulationMessage requestMessage) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing by tapping outside
+    builder: (context) => AlertDialog(
+      title: Text('Image Request'),
+      content: Text('The recipient has requested an image. Would you like to share?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            // Remove the request message and close dialog
+            _model.deleteMessage(requestMessage);
+            Navigator.of(context).pop();
+          },
+          child: Text('Decline'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            // Close the dialog immediately
+            Navigator.of(context).pop();
+
+            // Remove the request message 
+            _model.deleteMessage(requestMessage);
+            
+            // Trigger image pick
+            await _pickImage();
+            
+            // If an image was actually selected, send it
+            if (_pendingImageBytes != null) {
+              await _handleSendMessage('');
+            }
+          },
+          child: Text('Share Image'),
+        ),
+      ],
+    ),
+  );
+}
+
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      setState(() => _pendingImageBytes = bytes);
+    }
+  }
+
+  Future<void> _handleSendMessage(String text) async {
+    if (text.isEmpty && _pendingImageBytes == null) return;
+
+    final sent = await _controller.sendMessage(
+      text.isNotEmpty ? text : null,
+      imageBytes: _pendingImageBytes,
+    );
+
+    if (sent) {
+      setState(() {
+        _messageController.clear();
+        _pendingImageBytes = null;
+      });
+    }
   }
 
   @override
@@ -216,91 +280,139 @@ class _SimulationScreenState extends State<SimulationScreen> {
     );
   }
 
-  Widget _buildChatView({required bool isSender}) {
-    return Column(
-      children: [
-        Expanded(
-          child: StreamBuilder<List<SimulationMessage>>(
-            stream: _model.messageStream,
-            initialData: _model.messages,
-            builder: (context, snapshot) {
-              final messages = snapshot.data ?? [];
-              return ListView.builder(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  if (message.additionalData?['isVisible'] == false) {
-                    return Container();
-                  }
-                  return MessageBubble(
-    message: message,
-    isReceiver: !isSender,
-    onConsentRequest: () async {
-      final consentGranted = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AffirmativeConsentDialog(isSender: false),
-      );
-      
-      if (consentGranted == true) {
-        setState(() {
-          message.additionalData?['requiresRecipientConsent'] = false;
-        });
-      }
-    },
-    canSave: message.additionalData?['allowSaving'] ?? true,
-    canForward: message.additionalData?['allowForwarding'] ?? true,
-    onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Content saved')),
-    ),
-    onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Content forwarded')),
-    ),
-    onDelete: message.consentModel?.name == 'Dynamic Consent' 
-      ? (context) => _controller.deleteMessage(message)
-      : null,
-  );
-                },
+// Fix for the Affirmative Consent dialog issue
+Widget _buildChatView({required bool isSender}) {
+  return Column(
+    children: [
+      Expanded(
+        child: StreamBuilder<List<SimulationMessage>>(
+          stream: _model.messageStream,
+          initialData: _model.messages,
+          builder: (context, snapshot) {
+            final messages = snapshot.data ?? [];
+            
+            // Handle image request message only once per message
+            if (isSender) {
+              final imageRequestMessage = messages.firstWhereOrNull(
+                (message) => message.additionalData?['imageRequest'] == true && 
+                           !message.additionalData?['processed'] == true
               );
+              
+              if (imageRequestMessage != null) {
+                // Mark message as processed to prevent multiple dialogs
+                imageRequestMessage.additionalData?['processed'] = true;
+                
+                // Show dialog on next frame
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (dialogContext) => AlertDialog(
+                      title: Text('Image Request'),
+                      content: Text('The recipient has requested an image. Would you like to share?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            _model.deleteMessage(imageRequestMessage);
+                            Navigator.of(dialogContext).pop();
+                          },
+                          child: Text('Decline'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            Navigator.of(dialogContext).pop();
+                            _model.deleteMessage(imageRequestMessage);
+                            await _pickImage();
+                            if (_pendingImageBytes != null) {
+                              await _handleSendMessage('');
+                            }
+                          },
+                          child: Text('Share Image'),
+                        ),
+                      ],
+                    ),
+                  );
+                });
+              }
+            }
+
+            return ListView.builder(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                // Don't show image request messages in the chat
+                if (message.additionalData?['imageRequest'] == true) {
+                  return Container();
+                }
+                return MessageBubble(
+                  message: message,
+                  isReceiver: !isSender,
+                  onConsentRequest: () async {
+                    final consentGranted = await showDialog<bool>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => AffirmativeConsentDialog(isSender: false),
+                    );
+                    
+                    if (consentGranted == true) {
+                      setState(() {
+                        message.additionalData?['requiresRecipientConsent'] = false;
+                      });
+                    }
+                  },
+                  canSave: message.additionalData?['allowSaving'] ?? true,
+                  canForward: message.additionalData?['allowForwarding'] ?? true,
+                  onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Content saved')),
+                  ),
+                  onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Content forwarded')),
+                  ),
+                  onDelete: message.consentModel?.name == 'Dynamic Consent' 
+                    ? (context) => _controller.deleteMessage(message)
+                    : null,
+                );
+              },
+            );
+          },
+        ),
+      ),
+      
+      // Image request button for recipient
+      if (!isSender && _model.currentModel?.name == 'Affirmative Consent')
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton.icon(
+            icon: Icon(Icons.image_search),
+            label: Text('Request Image'),
+            onPressed: () {
+              _model.addMessage(SimulationMessage(
+                content: 'Image Request: Would you like to share an image?',
+                type: MessageType.text,
+                consentModel: _model.currentModel,
+                additionalData: {
+                  'imageRequest': true,
+                  'processed': false
+                },
+              ));
             },
+            style: ElevatedButton.styleFrom(
+              minimumSize: Size(double.infinity, 50),
+            ),
           ),
         ),
-        if (isSender)
-          ChatInput(
-            controller: _messageController,
-            onImagePick: _pickImage,
-            onSend: () => _handleSendMessage(_messageController.text),
-            pendingImage: _pendingImageBytes,
-            onClearImage: () => setState(() => _pendingImageBytes = null),
-          ),
-      ],
-    );
-  }
-
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes();
-      setState(() => _pendingImageBytes = bytes);
-    }
-  }
-
-  Future<void> _handleSendMessage(String text) async {
-    if (text.isEmpty && _pendingImageBytes == null) return;
-
-    final sent = await _controller.sendMessage(
-      text.isNotEmpty ? text : null,
-      imageBytes: _pendingImageBytes,
-    );
-
-    if (sent) {
-      setState(() {
-        _messageController.clear();
-        _pendingImageBytes = null;
-      });
-    }
-  }
+      
+      // Chat input for sender
+      if (isSender)
+        ChatInput(
+          controller: _messageController,
+          onImagePick: _pickImage,
+          onSend: () => _handleSendMessage(_messageController.text),
+          pendingImage: _pendingImageBytes,
+          onClearImage: () => setState(() => _pendingImageBytes = null),
+        ),
+    ],
+  );
 }
-
-
+}

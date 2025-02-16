@@ -297,7 +297,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
             Text(
               isSender
                 ? '• The image will be shared with the recipient\n'
-                  '• You have the right to revoke consent\n'
+                  '• You are under no obligation to agree\n'
                   '• You have willingly chosen to share this content'
                 : '• You will receive an image from the sender\n'
                   '• You can decline to view the content\n'
