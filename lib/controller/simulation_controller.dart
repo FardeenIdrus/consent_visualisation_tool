@@ -9,12 +9,13 @@ class SimulationController {
 
   SimulationController(this.model, this.context);
 
-  void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSettings) {
-    if (message.additionalData != null) {
-      message.additionalData!.addAll(newSettings);
-      model.notifyListeners();
-    }
+void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSettings) {
+  if (message.additionalData != null) {
+    message.additionalData!.addAll(newSettings);
+    model.notifyListeners();
   }
+}
+
 
   Future<bool> sendMessage(String? text, {Uint8List? imageBytes}) async {
     if (model.currentModel == null) return false;

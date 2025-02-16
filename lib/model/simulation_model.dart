@@ -67,74 +67,38 @@ class SimulationModel {
   }
 
 Future<void> _checkDynamicConsent() async {
-    if (_isShowingDialog) return;
+  if (_isShowingDialog) return;
 
-    final now = DateTime.now();
-    
-    for (var message in List<SimulationMessage>.from(messages)) {
-      if (message.consentModel?.name == 'Dynamic Consent' &&
-          message.additionalData != null &&
-          message.additionalData!['isVisible'] == true) {
-        
-        final lastConsentTime = DateTime.parse(message.additionalData!['lastConsentTime']);
-        final totalSeconds = message.additionalData!['totalSeconds'] as int;
-        final nextConsentTime = lastConsentTime.add(Duration(seconds: totalSeconds));
+  final now = DateTime.now();
 
-        // Debug print
-        print('Current time: $now');
-        print('Next consent time: $nextConsentTime');
-        print('Time until next consent: ${nextConsentTime.difference(now)}');
+  for (var message in List<SimulationMessage>.from(messages)) {
+    if (message.consentModel?.name == 'Dynamic Consent' &&
+        message.additionalData != null &&
+        message.additionalData!['isVisible'] == true) {
+      
+      final lastConsentTime = DateTime.parse(message.additionalData!['lastConsentTime']);
+      final totalSeconds = message.additionalData!['totalSeconds'] as int;
+      final nextConsentTime = lastConsentTime.add(Duration(seconds: totalSeconds));
 
-        if (now.isAfter(nextConsentTime) && context.mounted && !_isShowingDialog) {
-          _isShowingDialog = true;
-          
-          try {
-            final confirmed = await showDialog<bool>(
-              context: context,
-              barrierDismissible: false,
-              useRootNavigator: true,
-              builder: (dialogContext) => WillPopScope(
-                onWillPop: () async => false,
-                child: AlertDialog(
-                  title: Text('Consent Re-evaluation'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Would you like to continue sharing this image?'),
-                      SizedBox(height: 12),
-                      Text(
-                        _formatTimeSinceLastConsent(now.difference(lastConsentTime)),
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(false),
-                      child: Text('Revoke Consent'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.red,
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(true),
-                      child: Text('Continue Sharing'),
-                    ),
-                  ],
-                ),
-              ),
-            );
+      if (now.isAfter(nextConsentTime) && context.mounted && !_isShowingDialog) {
+        _isShowingDialog = true;
 
-            if (confirmed == true) {
+        try {
+          final result = await showDialog<Map<String, dynamic>>(
+            context: context,
+            barrierDismissible: false,
+            useRootNavigator: true,
+            builder: (dialogContext) => _DynamicConsentReassessmentDialog(),
+          );
+
+          if (result != null) {
+            if (result['continue'] == true) {
               message.additionalData!['lastConsentTime'] = now.toIso8601String();
+              if (result.containsKey('newTotalSeconds')) {
+                message.additionalData!['totalSeconds'] = result['newTotalSeconds'];
+              }
             } else {
-              // Remove the message instead of just setting isVisible to false
               deleteMessage(message);
-              
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -145,15 +109,17 @@ Future<void> _checkDynamicConsent() async {
                 );
               }
             }
-          } catch (e) {
-            print('Error showing dialog: $e');
-          } finally {
-            _isShowingDialog = false;
           }
+        } catch (e) {
+          print('Error showing dialog: $e');
+        } finally {
+          _isShowingDialog = false;
         }
       }
     }
   }
+}
+
 
   String _formatTimeSinceLastConsent(Duration duration) {
     final hours = duration.inHours;
@@ -192,4 +158,96 @@ Future<void> _checkDynamicConsent() async {
     _expiryTimer?.cancel();
     _messageController.close();
   }
+
+  
 }
+
+class _DynamicConsentReassessmentDialog extends StatefulWidget {
+  @override
+  _DynamicConsentReassessmentDialogState createState() =>
+      _DynamicConsentReassessmentDialogState();
+}
+
+class _DynamicConsentReassessmentDialogState
+    extends State<_DynamicConsentReassessmentDialog> {
+  final TextEditingController _hoursController = TextEditingController(text: '0');
+  final TextEditingController _minutesController = TextEditingController(text: '0');
+  final TextEditingController _secondsController = TextEditingController(text: '0');
+
+  @override
+  void dispose() {
+    _hoursController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Consent Re-evaluation'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Would you like to continue sharing this image?'),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _hoursController,
+                  decoration: InputDecoration(labelText: 'Hours'),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _minutesController,
+                  decoration: InputDecoration(labelText: 'Minutes'),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _secondsController,
+                  decoration: InputDecoration(labelText: 'Seconds'),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Adjust the time for the next reassessment, or leave it unchanged.',
+            style: TextStyle(color: Colors.grey[700]),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop({'continue': false}),
+          child: Text('Revoke Consent'),
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            final hours = int.tryParse(_hoursController.text) ?? 0;
+            final minutes = int.tryParse(_minutesController.text) ?? 0;
+            final seconds = int.tryParse(_secondsController.text) ?? 0;
+            final newTotalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+            Navigator.of(context).pop({
+              'continue': true,
+              'newTotalSeconds': newTotalSeconds > 0 ? newTotalSeconds : null
+            });
+          },
+          child: Text('Continue Sharing'),
+        ),
+      ],
+    );
+  }
+}
+
