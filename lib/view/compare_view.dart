@@ -2,7 +2,6 @@ import 'package:consent_visualisation_tool/controller/compare_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/view/simulation_view.dart';
 import 'package:flutter/material.dart';
-
 import '../theme/app_theme.dart';
 
 class CompareScreen extends StatefulWidget {
@@ -17,28 +16,28 @@ class _CompareScreenState extends State<CompareScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Secure Image Exchange - Consent Preferences'),
+        title: Text('Consent Model Comparison'),
         actions: [
-  ValueListenableBuilder<List<ConsentModel>>(
-    valueListenable: controller.selectedModels,
-    builder: (context, selectedModels, child) {
-      return selectedModels.length == 2 
-        ? IconButton(
-            icon: Icon(Icons.play_arrow),
-            onPressed: () {
-                  Navigator.push(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => const SimulationScreen()
-        )
-        );
+          ValueListenableBuilder<List<ConsentModel>>(
+            valueListenable: controller.selectedModels,
+            builder: (context, selectedModels, child) {
+              return selectedModels.length == 2
+                  ? IconButton(
+                      icon: Icon(Icons.play_arrow),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SimulationScreen(),
+                          ),
+                        );
+                      },
+                      tooltip: 'View Simulation',
+                    )
+                  : SizedBox.shrink();
             },
-            tooltip: 'View Simulation ',
           )
-        : SizedBox.shrink();
-    },
-  )
-]
+        ],
       ),
       body: ValueListenableBuilder<List<ConsentModel>>(
         valueListenable: controller.selectedModels,
@@ -48,37 +47,17 @@ class _CompareScreenState extends State<CompareScreen> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Choose your preferred consent model for sharing intimate images',
+                  'Select two consent models for comparison',
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                 ),
               ),
               _buildConsentModelSelectionRow(),
-              
               Expanded(
-                child: selectedModels.length == 2 
-                  ? _buildDetailedComparisonView(selectedModels)
-                  : _buildSelectModelsPrompt(),
+                child: selectedModels.length == 2
+                    ? _buildDetailedComparisonView(selectedModels)
+                    : _buildSelectModelsPrompt(),
               ),
-              if (selectedModels.length == 2)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                    builder: (context) => SimulationScreen()
-                  )
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
-                backgroundColor: AppTheme.primaryColor,
-              ),
-              child: const Text(
-                'View how these models would work in a chat interface',
-                style: TextStyle(color: Colors.white),)))
             ],
           );
         },
@@ -115,189 +94,70 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
-Widget _buildDetailedComparisonView(List<ConsentModel> selectedModels) {
-  return ListView(
-    padding: const EdgeInsets.all(16),
-    children: [
-      _buildComparisonSection(
-        'Initial Consent Process',
-        selectedModels,
-        (model) => controller.model.getInitialConsentProcess(model),
-      ),
-      _buildComparisonSection(
-        'Control Mechanisms',
-        selectedModels,
-        (model) => controller.model.getControlMechanisms(model),
-      ),
-      _buildComparisonSection(
-        'Consent Control & Modification',
-        selectedModels,
-        (model) => controller.model.getConsentModification(model),
-      ),
-      _buildCharacteristicsSection(selectedModels),
-      _buildRisksSection(selectedModels),
-    ],
-  );
-}
-
-Widget _buildComparisonSection(
-  String title,
-  List<ConsentModel> models,
-  String Function(ConsentModel) getValue,
-) {
-  return Card(
-    margin: const EdgeInsets.only(bottom: 16),
-    child: Padding(
+  Widget _buildDetailedComparisonView(List<ConsentModel> selectedModels) {
+    return ListView(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: models.map((model) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model.name,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      getValue(model),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-            )).toList(),
-          ),
-        ],
-      ),
-    ),
-  );
-}
+      children: [
+        _buildComparisonSection(
+          'Initial Consent Process',
+          selectedModels,
+          (model) => controller.model.getInitialConsentProcess(model),
+        ),
+        _buildComparisonSection(
+          'Permission Granularity (Technical Controls for Initial Content Sharing)',
+          selectedModels,
+          (model) => controller.model.getControlMechanisms(model),
+        ),
+        _buildComparisonSection(
+          'Consent Revocability & Modification (User Control After Content Sharing)',
+          selectedModels,
+          (model) => controller.model.getConsentModification(model),
+        ),
+      ],
+    );
+  }
 
-Widget _buildCharacteristicsSection(List<ConsentModel> models) {
-  return Card(
-    margin: const EdgeInsets.only(bottom: 16),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Key Characteristics',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: models.map((model) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model.name,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    ...model.keyCharacteristics.map((characteristic) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.check_circle_outline, 
-                            size: 16, 
-                            color: AppTheme.primaryColor
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              characteristic,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
+  Widget _buildComparisonSection(
+      String title, List<ConsentModel> models, String Function(ConsentModel) getValue) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: models.map((model) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        model.name,
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
-                    )).toList(),
-                  ],
-                ),
-              ),
-            )).toList(),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildRisksSection(List<ConsentModel> models) {
-  return Card(
-    margin: const EdgeInsets.only(bottom: 16),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Associated Risks',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: models.map((model) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model.name,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    ...model.risks.map((risk) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.warning_amber_rounded, 
-                            size: 16, 
-                            color: Colors.orange
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              risk,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 8),
+                      Text(
+                        getValue(model),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    )).toList(),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            )).toList(),
-          ),
-        ],
+              )).toList(),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
-
+    );
+  }
 
   Widget _buildSelectModelsPrompt() {
     return Center(
