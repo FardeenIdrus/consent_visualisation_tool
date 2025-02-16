@@ -329,69 +329,135 @@ class DynamicConsentDialog extends StatefulWidget {
 class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
   final TextEditingController _hoursController = TextEditingController();
   final TextEditingController _minutesController = TextEditingController();
+  final TextEditingController _secondsController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _hoursController.text = '24'; // Default to 24 hours
+    _hoursController.text = '0';
     _minutesController.text = '0';
+    _secondsController.text = '0';
   }
 
   @override
   void dispose() {
     _hoursController.dispose();
     _minutesController.dispose();
+    _secondsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Dynamic Consent Interval'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Set how often you want to reconfirm consent',
-            style: TextStyle(color: Colors.grey[700]),
-          ),
-          SizedBox(height: 16),
-          
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _hoursController,
-                  decoration: InputDecoration(
-                    labelText: 'Hours',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: TextField(
-                  controller: _minutesController,
-                  decoration: InputDecoration(
-                    labelText: 'Minutes',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Consent will be reconfirmed every '
-            '${_hoursController.text} hours and ${_minutesController.text} minutes',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontStyle: FontStyle.italic,
+      title: Text('Set Consent Re-evaluation Interval'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'How often should consent be re-evaluated?',
+              style: TextStyle(color: Colors.grey[700]),
             ),
-          ),
-        ],
+            SizedBox(height: 16),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _hoursController,
+                    decoration: InputDecoration(
+                      labelText: 'Hours',
+                      border: OutlineInputBorder(),
+                      helperText: '0-48',
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final hours = int.tryParse(value) ?? 0;
+                      if (hours > 48) {
+                        _hoursController.text = '48';
+                        _hoursController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: 2)
+                        );
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _minutesController,
+                    decoration: InputDecoration(
+                      labelText: 'Minutes',
+                      border: OutlineInputBorder(),
+                      helperText: '0-59',
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final minutes = int.tryParse(value) ?? 0;
+                      if (minutes > 59) {
+                        _minutesController.text = '59';
+                        _minutesController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: 2)
+                        );
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _secondsController,
+                    decoration: InputDecoration(
+                      labelText: 'Seconds',
+                      border: OutlineInputBorder(),
+                      helperText: '0-59',
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final seconds = int.tryParse(value) ?? 0;
+                      if (seconds > 59) {
+                        _secondsController.text = '59';
+                        _secondsController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: 2)
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'What this means:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '• You\'ll be asked to review your consent after the set time\n'
+                    '• You can choose to continue sharing or revoke access\n'
+                    '• The image can be deleted at any time',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -400,12 +466,12 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            final hours = int.tryParse(_hoursController.text) ?? 24;
+            final hours = int.tryParse(_hoursController.text) ?? 0;
             final minutes = int.tryParse(_minutesController.text) ?? 0;
+            final seconds = int.tryParse(_secondsController.text) ?? 0;
             
             Navigator.of(context).pop({
-              'consentIntervalHours': hours,
-              'consentIntervalMinutes': minutes,
+              'totalSeconds': hours * 3600 + minutes * 60 + seconds,
               'lastConsentTime': DateTime.now().toIso8601String(),
               'allowDeletion': true,
               'isVisible': true,
@@ -415,6 +481,12 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
         ),
       ],
     );
+  }
+}
+// Extension to capitalize first letter
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }
 class GranularConsentDialog extends StatefulWidget {
@@ -430,10 +502,6 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
     'allowForwarding': false,
     'timeLimit': false,
     'timeLimitMinutes': 60,
-    'allowScreenshots': false,
-    'addWatermark': false,
-    'viewingDuration': false,
-    'viewingDurationMinutes': 5,
   };
 
   @override
@@ -458,12 +526,6 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
               value: settings['allowSaving'],
               onChanged: (value) => setState(() => settings['allowSaving'] = value),
             ),
-            SwitchListTile(
-              title: Text('Allow Screenshots'),
-              subtitle: Text('Recipient can capture screenshots'),
-              value: settings['allowScreenshots'],
-              onChanged: (value) => setState(() => settings['allowScreenshots'] = value),
-            ),
             
             _buildPermissionSection('Sharing Controls'),
             SwitchListTile(
@@ -472,38 +534,41 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
               value: settings['allowForwarding'],
               onChanged: (value) => setState(() => settings['allowForwarding'] = value),
             ),
-            SwitchListTile(
-              title: Text('Add Watermark'),
-              subtitle: Text('Add recipient identifier watermark'),
-              value: settings['addWatermark'],
-              onChanged: (value) => setState(() => settings['addWatermark'] = value),
-            ),
             
             _buildPermissionSection('Time Restrictions'),
             SwitchListTile(
-              title: Text('Content Expiry'),
-              subtitle: Text('Content will be deleted after set time'),
+              title: Text('Set Time Limit'),
+              subtitle: Text('Content will be automatically deleted after the set time'),
               value: settings['timeLimit'],
               onChanged: (value) => setState(() => settings['timeLimit'] = value),
             ),
             if (settings['timeLimit'])
-              _buildTimeSlider(
-                'Delete after (minutes):',
-                'timeLimitMinutes',
-                180,
-              ),
-            
-            SwitchListTile(
-              title: Text('Viewing Time Limit'),
-              subtitle: Text('Limit single viewing session duration'),
-              value: settings['viewingDuration'],
-              onChanged: (value) => setState(() => settings['viewingDuration'] = value),
-            ),
-            if (settings['viewingDuration'])
-              _buildTimeSlider(
-                'Max viewing time (minutes):',
-                'viewingDurationMinutes',
-                30,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Access duration (minutes):'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: settings['timeLimitMinutes'].toDouble(),
+                            min: 1,
+                            max: 180,
+                            divisions: 179,
+                            label: '${settings['timeLimitMinutes']} min',
+                            onChanged: (value) {
+                              setState(() => settings['timeLimitMinutes'] = value.round());
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text('${settings['timeLimitMinutes']}m'),
+                      ],
+                    ),
+                  ],
+                ),
               ),
           ],
         ),
@@ -530,35 +595,6 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
           fontWeight: FontWeight.bold,
           fontSize: 16,
         ),
-      ),
-    );
-  }
-
-  Widget _buildTimeSlider(String label, String settingKey, double maxValue) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label),
-          Row(
-            children: [
-              Expanded(
-                child: Slider(
-                  value: settings[settingKey].toDouble(),
-                  min: 1,
-                  max: maxValue,
-                  divisions: maxValue.toInt() - 1,
-                  label: '${settings[settingKey]} min',
-                  onChanged: (value) {
-                    setState(() => settings[settingKey] = value.round());
-                  },
-                ),
-              ),
-              Text('${settings[settingKey]}m'),
-            ],
-          ),
-        ],
       ),
     );
   }

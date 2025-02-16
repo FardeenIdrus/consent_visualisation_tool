@@ -12,7 +12,7 @@ class MessageBubble extends StatelessWidget {
   final bool canForward;
   final Function(BuildContext) onSave;
   final Function(BuildContext) onForward;
-  final Function(BuildContext)? onDelete;  // Add this
+  final Function(BuildContext)? onDelete;
 
   const MessageBubble({
     Key? key,
@@ -23,7 +23,7 @@ class MessageBubble extends StatelessWidget {
     this.canForward = true,
     required this.onSave,
     required this.onForward,
-    this.onDelete,  // Add this
+    this.onDelete,
   }) : super(key: key);
 
   @override
@@ -48,24 +48,6 @@ class MessageBubble extends StatelessWidget {
       ),
     );
   }
-
-  String _getRemainingTime() {
-    if (message.consentModel?.name == 'Granular Consent' && 
-        message.additionalData?['timeLimit'] == true) {
-      final minutes = message.additionalData!['timeLimitMinutes'] as int;
-      final expiryTime = message.timestamp.add(Duration(minutes: minutes));
-      final remaining = expiryTime.difference(DateTime.now());
-      
-      if (remaining.isNegative) {
-        return 'Expired';
-      }
-      // Return just the number of seconds
-      return '${remaining.inSeconds}';
-    }
-    return '';
-  }
-
-
 
   Widget _buildConsentRequest(BuildContext context) {
     return Container(
@@ -110,7 +92,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-Widget _buildHeader() {
+  Widget _buildHeader() {
     bool isAwaitingConsent = message.consentModel?.name == 'Affirmative Consent' &&
                             message.additionalData?['requiresRecipientConsent'] == true;
     
@@ -136,163 +118,165 @@ Widget _buildHeader() {
     );
   }
 
-Widget _buildContent(BuildContext context) {
-  if (message.type == MessageType.image) {
-    bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
-    bool canDelete = message.additionalData?['allowDeletion'] == true;
-    String timeRemaining = '';
-    bool isExpired = false;
+  Widget _buildContent(BuildContext context) {
+    if (message.type == MessageType.image) {
+      bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
+      bool canDelete = message.additionalData?['allowDeletion'] == true;
+      String timeRemaining = '';
+      bool isExpired = false;
 
-    if (message.consentModel?.name == 'Granular Consent' && 
-        message.additionalData?['timeLimit'] == true) {
-      final minutes = message.additionalData!['timeLimitMinutes'] as int;
-      final expiryTime = message.timestamp.add(Duration(minutes: minutes));
-      final remaining = expiryTime.difference(DateTime.now());
-      
-      if (remaining.isNegative) {
-        timeRemaining = 'Expired';
-        isExpired = true;
-      } else {
-        timeRemaining = '${remaining.inSeconds}';
+      // Only calculate and show time remaining for sender in Granular Consent
+      if (!isReceiver && message.consentModel?.name == 'Granular Consent' && 
+          message.additionalData?['timeLimit'] == true) {
+        final minutes = message.additionalData!['timeLimitMinutes'] as int;
+        final expiryTime = message.timestamp.add(Duration(minutes: minutes));
+        final remaining = expiryTime.difference(DateTime.now());
+        
+        if (remaining.isNegative) {
+          timeRemaining = 'Expired';
+          isExpired = true;
+        } else {
+          timeRemaining = '${remaining.inSeconds}';
+        }
       }
-    }
 
-    return Container(
-      constraints: BoxConstraints(maxWidth: 240),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.memory(
-              message.imageData!,
-              width: 240,
-              height: 320,
-              fit: BoxFit.cover,
+      return Container(
+        constraints: BoxConstraints(maxWidth: 240),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.memory(
+                message.imageData!,
+                width: 240,
+                height: 320,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          if (timeRemaining.isNotEmpty)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  timeRemaining,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            // Only show timer for sender
+            if (timeRemaining.isNotEmpty && !isReceiver)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    timeRemaining,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-          if (isReceiver || (isDynamicConsent && !isReceiver))
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isDynamicConsent && !isReceiver && canDelete)
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: _buildActionButton(
-                        icon: Icons.delete_outline,
-                        enabled: true,
-                        onPressed: () => onDelete?.call(context),
-                        label: 'Delete',
-                      ),
-                    ),
-                  if (isReceiver) ...[
-                    if (canSave)
+            if (isReceiver || (isDynamicConsent && !isReceiver))
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isDynamicConsent && !isReceiver && canDelete)
                       Container(
                         margin: EdgeInsets.only(right: 8),
                         child: _buildActionButton(
-                          icon: Icons.save_rounded,
+                          icon: Icons.delete_outline,
                           enabled: true,
-                          onPressed: () => onSave(context),
-                          label: 'Save',
+                          onPressed: () => onDelete?.call(context),
+                          label: 'Delete',
                         ),
                       ),
-                    if (canForward)
-                      _buildActionButton(
-                        icon: Icons.forward_rounded,
-                        enabled: true,
-                        onPressed: () => onForward(context),
-                        label: 'Forward',
-                      ),
+                    if (isReceiver) ...[
+                      if (canSave)
+                        Container(
+                          margin: EdgeInsets.only(right: 8),
+                          child: _buildActionButton(
+                            icon: Icons.save_rounded,
+                            enabled: true,
+                            onPressed: () => onSave(context),
+                            label: 'Save',
+                          ),
+                        ),
+                      if (canForward)
+                        _buildActionButton(
+                          icon: Icons.forward_rounded,
+                          enabled: true,
+                          onPressed: () => onForward(context),
+                          label: 'Forward',
+                        ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: 280),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        message.content,
+        style: TextStyle(
+          color: Colors.black87,
+          fontSize: 16,
+        ),
       ),
     );
   }
 
-  return Container(
-    constraints: BoxConstraints(maxWidth: 280),
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    decoration: BoxDecoration(
-      color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Text(
-      message.content,
-      style: TextStyle(
-        color: Colors.black87,
-        fontSize: 16,
+  Widget _buildActionButton({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onPressed,
+    required String label,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(8),
       ),
-    ),
-  );
-}
-
-Widget _buildActionButton({
-  required IconData icon,
-  required bool enabled,
-  required VoidCallback onPressed,
-  required String label,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.black54,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Tooltip(
-      message: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled ? onPressed : null,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: enabled ? Colors.white : Colors.grey[400],
-                ),
-                SizedBox(width: 4),
-                Text(
-                  label,
-                  style: TextStyle(
+      child: Tooltip(
+        message: label,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: enabled ? onPressed : null,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 20,
                     color: enabled ? Colors.white : Colors.grey[400],
-                    fontSize: 12,
                   ),
-                ),
-              ],
+                  SizedBox(width: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: enabled ? Colors.white : Colors.grey[400],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

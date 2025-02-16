@@ -25,18 +25,14 @@ class SimulationModel {
   List<SimulationMessage> messages = [];
   ConsentModel? currentModel;
   Timer? _expiryTimer;
-  Timer? _consentCheckTimer;
   final _messageController = StreamController<List<SimulationMessage>>.broadcast();
   final BuildContext context;
+  bool _isShowingDialog = false;  // Add flag to prevent multiple dialogs
 
   SimulationModel(this.context) {
-    // Check for expired messages every second
+    // Check every second for both expired messages and consent re-evaluation
     _expiryTimer = Timer.periodic(Duration(seconds: 1), (_) {
       _checkExpiredMessages();
-    });
-    
-    // Check dynamic consent every minute
-    _consentCheckTimer = Timer.periodic(Duration(minutes: 1), (_) {
       _checkDynamicConsent();
     });
   }
@@ -64,66 +60,108 @@ class SimulationModel {
     }
   }
 
+Future<void> _checkDynamicConsent() async {
+    if (_isShowingDialog) return;
 
-  void _checkDynamicConsent() async {
-    for (var message in messages) {
+    final now = DateTime.now();
+    
+    for (var message in List<SimulationMessage>.from(messages)) {
       if (message.consentModel?.name == 'Dynamic Consent' &&
           message.additionalData != null &&
           message.additionalData!['isVisible'] == true) {
         
         final lastConsentTime = DateTime.parse(message.additionalData!['lastConsentTime']);
-        final hours = message.additionalData!['consentIntervalHours'] as int;
-        final minutes = message.additionalData!['consentIntervalMinutes'] as int;
-        final nextConsentTime = lastConsentTime.add(
-          Duration(hours: hours, minutes: minutes)
-        );
+        final totalSeconds = message.additionalData!['totalSeconds'] as int;
+        final nextConsentTime = lastConsentTime.add(Duration(seconds: totalSeconds));
 
-        if (DateTime.now().isAfter(nextConsentTime)) {
-          final confirmed = await showDialog<bool>(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text('Consent Reconfirmation'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Would you like to continue sharing this image?'),
-                  SizedBox(height: 10),
-                  Text(
-                    'Last confirmed: ${lastConsentTime.toLocal()}',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
+        // Debug print
+        print('Current time: $now');
+        print('Next consent time: $nextConsentTime');
+        print('Time until next consent: ${nextConsentTime.difference(now)}');
+
+        if (now.isAfter(nextConsentTime) && context.mounted && !_isShowingDialog) {
+          _isShowingDialog = true;
+          
+          try {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              barrierDismissible: false,
+              useRootNavigator: true,
+              builder: (dialogContext) => WillPopScope(
+                onWillPop: () async => false,
+                child: AlertDialog(
+                  title: Text('Consent Re-evaluation'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Would you like to continue sharing this image?'),
+                      SizedBox(height: 12),
+                      Text(
+                        _formatTimeSinceLastConsent(now.difference(lastConsentTime)),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: Text('Revoke Consent'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      child: Text('Continue Sharing'),
+                    ),
+                  ],
+                ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text('Revoke Consent'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text('Continue Sharing'),
-                ),
-              ],
-            ),
-          );
+            );
 
-          if (confirmed == true) {
-            // Update last consent time
-            message.additionalData!['lastConsentTime'] = DateTime.now().toIso8601String();
-          } else {
-            // Hide message if consent is revoked
-            message.additionalData!['isVisible'] = false;
+            if (confirmed == true) {
+              message.additionalData!['lastConsentTime'] = now.toIso8601String();
+            } else {
+              // Remove the message instead of just setting isVisible to false
+              deleteMessage(message);
+              
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Image has been deleted'),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
+            }
+          } catch (e) {
+            print('Error showing dialog: $e');
+          } finally {
+            _isShowingDialog = false;
           }
-          _messageController.add(messages);
         }
       }
     }
   }
 
+  String _formatTimeSinceLastConsent(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    final seconds = duration.inSeconds % 60;
+
+    if (hours > 0) {
+      return 'Time since last consent: $hours hours, $minutes minutes, $seconds seconds';
+    } else if (minutes > 0) {
+      return 'Time since last consent: $minutes minutes, $seconds seconds';
+    } else {
+      return 'Time since last consent: $seconds seconds';
+    }
+  }
 
   void addMessage(SimulationMessage message) {
     messages.add(message);
@@ -142,7 +180,6 @@ class SimulationModel {
 
   void dispose() {
     _expiryTimer?.cancel();
-    _consentCheckTimer?.cancel();
     _messageController.close();
   }
 }
