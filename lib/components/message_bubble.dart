@@ -1,8 +1,10 @@
 // lib/components/message_bubble.dart
-
 import 'package:flutter/material.dart';
 import '../model/simulation_model.dart';
 import '../theme/app_theme.dart';
+import '../controller/simulation_controller.dart';
+
+
 
 class MessageBubble extends StatelessWidget {
   final SimulationMessage message;
@@ -13,6 +15,7 @@ class MessageBubble extends StatelessWidget {
   final Function(BuildContext) onSave;
   final Function(BuildContext) onForward;
   final Function(BuildContext)? onDelete;
+  final SimulationController controller;
 
   const MessageBubble({
     Key? key,
@@ -24,11 +27,24 @@ class MessageBubble extends StatelessWidget {
     required this.onSave,
     required this.onForward,
     this.onDelete,
+    required this.controller,
   }) : super(key: key);
+
+  void _showGranularSettings(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => GranularConsentDialog(
+        initialSettings: message.additionalData,
+        isModification: true,
+        onSettingsUpdated: (newSettings) {
+          controller.updateMessageSettings(message, newSettings);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Handle affirmative consent request for images
     if (isReceiver && 
         message.type == MessageType.image && 
         message.consentModel?.name == 'Affirmative Consent' &&
@@ -44,49 +60,6 @@ class MessageBubble extends StatelessWidget {
         children: [
           _buildHeader(),
           _buildContent(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConsentRequest(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.lock_outline, size: 20, color: Colors.grey[600]),
-              SizedBox(width: 8),
-              Text(
-                'Consent Required',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            icon: Icon(Icons.visibility),
-            label: Text('View Image'),
-            onPressed: onConsentRequest,
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: AppTheme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -122,11 +95,22 @@ class MessageBubble extends StatelessWidget {
     if (message.type == MessageType.image) {
       bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
       bool canDelete = message.additionalData?['allowDeletion'] == true;
+      List<Widget> controls = [];
       String timeRemaining = '';
       bool isExpired = false;
 
-      // Only calculate and show time remaining for sender in Granular Consent
-      if (!isReceiver && message.consentModel?.name == 'Granular Consent' && 
+      if (!isReceiver && message.consentModel?.name == 'Granular Consent') {
+        controls.add(
+          _buildActionButton(
+            icon: Icons.settings,
+            enabled: true,
+            onPressed: () => _showGranularSettings(context),
+            label: 'Settings',
+          ),
+        );
+      }
+
+      if (message.consentModel?.name == 'Granular Consent' && 
           message.additionalData?['timeLimit'] == true) {
         final minutes = message.additionalData!['timeLimitMinutes'] as int;
         final expiryTime = message.timestamp.add(Duration(minutes: minutes));
@@ -153,7 +137,6 @@ class MessageBubble extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            // Only show timer for sender
             if (timeRemaining.isNotEmpty && !isReceiver)
               Positioned(
                 top: 8,
@@ -174,13 +157,14 @@ class MessageBubble extends StatelessWidget {
                   ),
                 ),
               ),
-            if (isReceiver || (isDynamicConsent && !isReceiver))
+            if (controls.isNotEmpty || isReceiver || (isDynamicConsent && !isReceiver))
               Positioned(
                 bottom: 8,
                 right: 8,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    ...controls,
                     if (isDynamicConsent && !isReceiver && canDelete)
                       Container(
                         margin: EdgeInsets.only(right: 8),
@@ -231,6 +215,49 @@ class MessageBubble extends StatelessWidget {
           color: Colors.black87,
           fontSize: 16,
         ),
+      ),
+    );
+  }
+
+  Widget _buildConsentRequest(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.lock_outline, size: 20, color: Colors.grey[600]),
+              SizedBox(width: 8),
+              Text(
+                'Consent Required',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            icon: Icon(Icons.visibility),
+            label: Text('View Image'),
+            onPressed: onConsentRequest,
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: AppTheme.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

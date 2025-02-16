@@ -2,13 +2,21 @@ import 'dart:typed_data';
 import 'package:consent_visualisation_tool/model/simulation_model.dart';
 import 'package:flutter/material.dart';
 
+
 class SimulationController {
   final SimulationModel model;
   final BuildContext context;
 
   SimulationController(this.model, this.context);
 
-Future<bool> sendMessage(String? text, {Uint8List? imageBytes}) async {
+  void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSettings) {
+    if (message.additionalData != null) {
+      message.additionalData!.addAll(newSettings);
+      model.notifyListeners();
+    }
+  }
+
+  Future<bool> sendMessage(String? text, {Uint8List? imageBytes}) async {
     if (model.currentModel == null) return false;
 
     switch (model.currentModel!.name) {
@@ -75,7 +83,7 @@ Future<bool> sendMessage(String? text, {Uint8List? imageBytes}) async {
     }
   }
 
-  Future<bool> deleteMessage(SimulationMessage message) async {
+Future<bool> deleteMessage(SimulationMessage message) async {
     if (message.additionalData?['allowDeletion'] == true) {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -490,24 +498,45 @@ extension StringExtension on String {
   }
 }
 class GranularConsentDialog extends StatefulWidget {
-  const GranularConsentDialog({super.key});
+  final Map<String, dynamic>? initialSettings;
+  final bool isModification;
+  final Function(Map<String, dynamic>)? onSettingsUpdated;
+
+  const GranularConsentDialog({
+    super.key, 
+    this.initialSettings,
+    this.isModification = false,
+    this.onSettingsUpdated,
+  });
 
   @override
   _GranularConsentDialogState createState() => _GranularConsentDialogState();
 }
 
 class _GranularConsentDialogState extends State<GranularConsentDialog> {
-  final Map<String, dynamic> settings = {
-    'allowSaving': false,
-    'allowForwarding': false,
-    'timeLimit': false,
-    'timeLimitMinutes': 60,
-  };
+  late Map<String, dynamic> settings;
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    settings = widget.initialSettings?.cast<String, dynamic>() ?? {
+      'allowSaving': false,
+      'allowForwarding': false,
+      'timeLimit': false,
+      'timeLimitMinutes': 60,
+      'allowScreenshots': false,
+      'addWatermark': false,
+      'viewingDuration': false,
+      'viewingDurationMinutes': 5,
+    };
+  }
+
+  @override
+Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Detailed Sharing Permissions'),
+      title: Text(widget.isModification 
+        ? 'Modify Sharing Permissions' 
+        : 'Set Sharing Permissions'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -579,12 +608,24 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
           child: Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(settings),
-          child: Text('Apply Settings'),
+          onPressed: () {
+            if (widget.isModification) {
+              widget.onSettingsUpdated?.call(settings);
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).pop(settings);
+            }
+          },
+          child: Text(widget.isModification ? 'Update Settings' : 'Apply Settings'),
         ),
       ],
     );
   }
+
+// In simulation_controller.dart, add this to the SimulationController class:
+
+// In simulation_controller.dart add the updateMessageSettings method:
+
 
   Widget _buildPermissionSection(String title) {
     return Padding(

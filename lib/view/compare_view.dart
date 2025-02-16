@@ -115,58 +115,189 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
-  Widget _buildDetailedComparisonView(List<ConsentModel> selectedModels) {
-    return ListView.builder(
-      itemCount: selectedModels.length,
-      itemBuilder: (context, index) {
-        final model = selectedModels[index];
-        return Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  model.name,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                SizedBox(height: 10),
-                Text(
-                  model.description,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Understanding the Risks',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                ...model.risks.map((risk) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.warning_amber_rounded, 
-                        size: 16, 
-                        color: Colors.orange
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          risk,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                )).toList(),
-              ],
-            ),
+Widget _buildDetailedComparisonView(List<ConsentModel> selectedModels) {
+  return ListView(
+    padding: const EdgeInsets.all(16),
+    children: [
+      _buildComparisonSection(
+        'Initial Consent Process',
+        selectedModels,
+        (model) => controller.model.getInitialConsentProcess(model),
+      ),
+      _buildComparisonSection(
+        'Control Mechanisms',
+        selectedModels,
+        (model) => controller.model.getControlMechanisms(model),
+      ),
+      _buildComparisonSection(
+        'Consent Control & Modification',
+        selectedModels,
+        (model) => controller.model.getConsentModification(model),
+      ),
+      _buildCharacteristicsSection(selectedModels),
+      _buildRisksSection(selectedModels),
+    ],
+  );
+}
+
+Widget _buildComparisonSection(
+  String title,
+  List<ConsentModel> models,
+  String Function(ConsentModel) getValue,
+) {
+  return Card(
+    margin: const EdgeInsets.only(bottom: 16),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-        );
-      },
-    );
-  }
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: models.map((model) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      model.name,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      getValue(model),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildCharacteristicsSection(List<ConsentModel> models) {
+  return Card(
+    margin: const EdgeInsets.only(bottom: 16),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Key Characteristics',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: models.map((model) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      model.name,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    ...model.keyCharacteristics.map((characteristic) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.check_circle_outline, 
+                            size: 16, 
+                            color: AppTheme.primaryColor
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              characteristic,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )).toList(),
+                  ],
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildRisksSection(List<ConsentModel> models) {
+  return Card(
+    margin: const EdgeInsets.only(bottom: 16),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Associated Risks',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: models.map((model) => Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      model.name,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    ...model.risks.map((risk) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.warning_amber_rounded, 
+                            size: 16, 
+                            color: Colors.orange
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              risk,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )).toList(),
+                  ],
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
 
   Widget _buildSelectModelsPrompt() {
     return Center(

@@ -346,8 +346,9 @@ Widget _buildChatView({required bool isSender}) {
                   return Container();
                 }
                 return MessageBubble(
-                  message: message,
-                  isReceiver: !isSender,
+  message: message,
+  isReceiver: !isSender,
+  controller: _controller,
                   onConsentRequest: () async {
                     final consentGranted = await showDialog<bool>(
                       context: context,

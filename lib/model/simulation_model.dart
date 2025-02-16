@@ -37,7 +37,13 @@ class SimulationModel {
     });
   }
 
+
+
   Stream<List<SimulationMessage>> get messageStream => _messageController.stream;
+
+   void notifyListeners() {
+    _messageController.add(messages);
+  }
 
   void _checkExpiredMessages() {
     bool hasExpired = false;
@@ -167,6 +173,10 @@ Future<void> _checkDynamicConsent() async {
     messages.add(message);
     _messageController.add(messages);
   }
+
+  // In simulation_model.dart, add this method to the SimulationModel class:
+
+// In simulation_model.dart add:
 
   void deleteMessage(SimulationMessage message) {
     messages.remove(message);
