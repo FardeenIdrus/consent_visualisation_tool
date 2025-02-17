@@ -1,10 +1,8 @@
 import 'package:consent_visualisation_tool/controller/compare_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
-import 'package:consent_visualisation_tool/view/comparison_matrix_view.dart';
 import 'package:consent_visualisation_tool/view/simulation_view.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-
 
 class CompareScreen extends StatefulWidget {
   @override
@@ -15,78 +13,57 @@ class _CompareScreenState extends State<CompareScreen> {
   final CompareController controller = CompareController();
 
   @override
-
-  // In your compare_view.dart file, add a button to the AppBar actions:
-
-
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Consent Model Comparison'),
-      actions: [
-        // Add matrix button
-        TextButton.icon(
-          icon: const Icon(Icons.grid_view),
-          label: const Text('View Table'),
-          style: TextButton.styleFrom(
-            foregroundColor: AppTheme.textPrimaryColor,
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const MatrixScreen(),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Consent Model Comparison'),
+        actions: [
+          ValueListenableBuilder<List<ConsentModel>>(
+            valueListenable: controller.selectedModels,
+            builder: (context, selectedModels, child) {
+              return selectedModels.length == 2
+                  ? IconButton(
+                      icon: Icon(Icons.play_arrow),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SimulationScreen(),
+                          ),
+                        );
+                      },
+                      tooltip: 'View Simulation',
+                    )
+                  : SizedBox.shrink();
+            },
+          )
+        ],
+      ),
+      body: ValueListenableBuilder<List<ConsentModel>>(
+        valueListenable: controller.selectedModels,
+        builder: (context, selectedModels, child) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Select two consent models for comparison',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
               ),
-            );
-          },
-        ),
-        // Your existing simulation button
-        ValueListenableBuilder<List<ConsentModel>>(
-          valueListenable: controller.selectedModels,
-          builder: (context, selectedModels, child) {
-            return selectedModels.length == 2
-                ? IconButton(
-                    icon: Icon(Icons.play_arrow),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SimulationScreen(),
-                        ),
-                      );
-                    },
-                    tooltip: 'View Simulation',
-                  )
-                : SizedBox.shrink();
-          },
-        )
-      ],
-    ),
-    body: ValueListenableBuilder<List<ConsentModel>>(
-      valueListenable: controller.selectedModels,
-      builder: (context, selectedModels, child) {
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Select two consent models for comparison',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
+              _buildConsentModelSelectionRow(),
+              Expanded(
+                child: selectedModels.length == 2
+                    ? _buildDetailedComparisonView(selectedModels)
+                    : _buildSelectModelsPrompt(),
               ),
-            ),
-            _buildConsentModelSelectionRow(),
-            Expanded(
-              child: selectedModels.length == 2
-                  ? _buildDetailedComparisonView(selectedModels)
-                  : _buildSelectModelsPrompt(),
-            ),
-          ],
-        );
-      },
-    ),
-  );
-}
+            ],
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildConsentModelSelectionRow() {
     return SingleChildScrollView(
