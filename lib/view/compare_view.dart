@@ -20,7 +20,7 @@ class _CompareScreenState extends State<CompareScreen> {
     'icon': Icons.start_outlined,
   },
   'permissions': {
-    'title': 'Permission Controls',
+    'title': 'Permission Granularity',
     'description': 'Technical controls and restrictions at the point of sharing',
     'icon': Icons.security_outlined,
   },
