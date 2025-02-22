@@ -1,4 +1,5 @@
 // lib/components/message_bubble.dart
+import 'package:consent_visualisation_tool/view/chat_interface_view.dart';
 import 'package:flutter/material.dart';
 import '../model/chat_interface_model.dart';
 import '../theme/app_theme.dart';
