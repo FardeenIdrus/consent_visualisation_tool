@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:consent_visualisation_tool/model/simulation_model.dart';
+import 'package:consent_visualisation_tool/model/chat_interface_model.dart';
 import 'package:flutter/material.dart';
 
 

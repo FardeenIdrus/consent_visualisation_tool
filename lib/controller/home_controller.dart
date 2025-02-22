@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../model/home_model.dart';
 import '../view/compare_view.dart';
-import '../view/simulation_view.dart';
+import '../view/chat_interface_view.dart';
 
 class HomeController {
   final homeScreenModel = HomeScreenModel();

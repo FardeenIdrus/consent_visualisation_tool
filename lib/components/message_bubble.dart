@@ -1,8 +1,8 @@
 // lib/components/message_bubble.dart
 import 'package:flutter/material.dart';
-import '../model/simulation_model.dart';
+import '../model/chat_interface_model.dart';
 import '../theme/app_theme.dart';
-import '../controller/simulation_controller.dart';
+import '../controller/chat_interface_controller.dart';
 
 
 

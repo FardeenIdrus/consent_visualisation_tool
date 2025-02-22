@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:consent_visualisation_tool/controller/compare_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
-import 'package:consent_visualisation_tool/view/simulation_view.dart';
+import 'package:consent_visualisation_tool/view/chat_interface_view.dart';
 import '../theme/app_theme.dart';
 
 /// A screen that allows users to compare two consent models across different dimensions.
