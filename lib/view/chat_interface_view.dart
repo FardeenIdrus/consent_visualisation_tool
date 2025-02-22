@@ -320,22 +320,22 @@ Widget _buildChatView({required bool isSender}) {
                           child: Text('Decline'),
                         ),
                         ElevatedButton(
-  onPressed: () async {
-    Navigator.of(dialogContext).pop();
-    _model.deleteMessage(imageRequestMessage);
-    await _pickImage();
-    if (_pendingImageBytes != null) {
-      await _handleSendMessage('', recipientRequested: true); // Add the flag here
-    }
-  },
-  child: Text('Share Image'),
-),
-                      ],
-                    ),
-                  );
-                });
-              }
-            }
+                          onPressed: () async {
+                            Navigator.of(dialogContext).pop();
+                            _model.deleteMessage(imageRequestMessage);
+                            await _pickImage();
+                            if (_pendingImageBytes != null) {
+                              await _handleSendMessage('', recipientRequested: true); // Add the flag here
+                            }
+                          },
+                          child: Text('Share Image'),
+                        ),
+                                              ],
+                                            ),
+                                          );
+                                        });
+                                      }
+                                    }
 
             return ListView.builder(
               padding: EdgeInsets.symmetric(vertical: 16),
@@ -363,18 +363,19 @@ Widget _buildChatView({required bool isSender}) {
                       });
                     }
                   },
-                  canSave: message.additionalData?['allowSaving'] ?? true,
-                  canForward: message.additionalData?['allowForwarding'] ?? true,
-                  onSave: (context) => ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Content saved')),
-                  ),
-                  onForward: (context) => ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Content forwarded')),
-                  ),
-                  onDelete: message.consentModel?.name == 'Dynamic Consent' 
-                    ? (context) => _controller.deleteMessage(message)
-                    : null,
-                );
+      canSave: message.additionalData?['allowSaving'] ?? true,
+  canForward: message.additionalData?['allowForwarding'] ?? true,
+  onSave: (context) {
+    _showActionAnimation(context, 'save');
+  },
+  onForward: (context) {
+    _showActionAnimation(context, 'forward');
+  },
+  onDelete: message.consentModel?.name == 'Dynamic Consent' 
+    ? (context) => _controller.deleteMessage(message)
+    : null,
+);
+
               },
             );
           },
@@ -416,5 +417,64 @@ Widget _buildChatView({required bool isSender}) {
         ),
     ],
   );
+}
+
+void _showActionAnimation(BuildContext context, String action) {
+  OverlayEntry overlayEntry = OverlayEntry(
+    builder: (context) => Center(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: Duration(milliseconds: 400),
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.scale(
+              scale: 0.5 + (value * 0.5),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                margin: EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 20,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      action == 'save' ? Icons.check_circle : Icons.forward,
+                      color: AppTheme.primaryColor,
+                      size: 48,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      action == 'save' ? 'Image saved!' : 'Image forwarded!',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+  );
+
+  Overlay.of(context).insert(overlayEntry);
+
+  Future.delayed(Duration(seconds: 1), () {
+    overlayEntry.remove();
+  });
 }
 }
