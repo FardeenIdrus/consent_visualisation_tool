@@ -232,22 +232,52 @@ class _CompareScreenState extends State<CompareScreen> {
   }
 
   /// Builds the description text for the currently selected dimension
-  Widget _buildDimensionDescription() {
+Widget _buildDimensionDescription() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      color: Colors.grey[100],
-      child: Text(
-        dimensions[controller.selectedDimension.value]?['description'] as String? ?? 
-          'Select a dimension to compare',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppTheme.textSecondaryColor,
-          fontStyle: FontStyle.italic,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryColor.withOpacity(0.1), 
+            AppTheme.primaryColor.withOpacity(0.05)
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        border: Border(
+          left: BorderSide(
+            color: AppTheme.primaryColor,
+            width: 4,
+          ),
         ),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Dimension Focus',
+            style: TextStyle(
+              color: AppTheme.primaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            dimensions[controller.selectedDimension.value]?['description'] as String? ?? 
+              'Select a dimension to compare',
+            style: TextStyle(
+              color: AppTheme.textPrimaryColor,
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
     );
-  }
+  }  
+
 
   /// Builds the main comparison content area showing models side by side
   ///
