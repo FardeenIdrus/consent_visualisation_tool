@@ -1,35 +1,64 @@
+// lib/view/compare_view.dart
 import 'package:flutter/material.dart';
 import 'package:consent_visualisation_tool/controller/compare_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/view/simulation_view.dart';
 import '../theme/app_theme.dart';
 
+/// A screen that allows users to compare two consent models across different dimensions.
+///
+/// This widget displays a UI for selecting and comparing consent models side by side,
+/// highlighting their differences in initial consent processes, permission controls,
+/// and modification capabilities.
 class CompareScreen extends StatefulWidget {
+  const CompareScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _CompareScreenState createState() => _CompareScreenState();
 }
 
 class _CompareScreenState extends State<CompareScreen> {
+  /// Controller that manages the comparison state and logic
   final CompareController controller = CompareController();
+  
+  /// Local tracking of selected dimension (initial, permissions, revocability)
   String selectedDimension = 'initial';
 
+  /// Definition of available comparison dimensions with their metadata
   final Map<String, Map<String, Object>> dimensions = {
-  'initial': {
-    'title': 'Initial Consent Process',
-    'description': 'How consent is first established and obtained',
-    'icon': Icons.start_outlined,
-  },
-  'permissions': {
-    'title': 'Permission Granularity',
-    'description': 'Technical controls and restrictions at the point of sharing',
-    'icon': Icons.security_outlined,
-  },
-  'revocability': {
-    'title': 'Modification & Revocation',
-    'description': 'Post-sharing control and modification options',
-    'icon': Icons.change_circle_outlined,
+    'initial': {
+      'title': 'Initial Consent Process',
+      'description': 'How consent is first established and obtained',
+      'icon': Icons.start_outlined,
+    },
+    'permissions': {
+      'title': 'Permission Granularity',
+      'description': 'Technical controls and restrictions at the point of sharing',
+      'icon': Icons.security_outlined,
+    },
+    'revocability': {
+      'title': 'Modification & Revocation',
+      'description': 'Post-sharing control and modification options',
+      'icon': Icons.change_circle_outlined,
+    }
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to changes in selected dimension
+    controller.selectedDimension.addListener(() {
+      setState(() {});
+    });
   }
-};
+
+  @override
+  void dispose() {
+    // Remove listener to prevent memory leaks
+    controller.selectedDimension.removeListener(() {});
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +84,12 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds the app bar with action buttons
+  ///
+  /// Includes a simulation button that appears when two models are selected
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: Text('Consent Model Comparison'),
+      title: const Text('Consent Model Comparison'),
       centerTitle: true,
       elevation: 0,
       actions: [
@@ -66,32 +98,35 @@ class _CompareScreenState extends State<CompareScreen> {
           builder: (context, selectedModels, child) {
             return selectedModels.length == 2
                 ? IconButton(
-                    icon: Icon(Icons.play_arrow),
+                    icon: const Icon(Icons.play_arrow),
                     tooltip: 'Start Simulation',
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SimulationScreen(),
+                        builder: (context) => const SimulationScreen(),
                       ),
                     ),
                   )
-                : SizedBox.shrink();
+                : const SizedBox.shrink();
           },
         ),
       ],
     );
   }
 
+  /// Builds the model selection area
+  ///
+  /// Displays available consent models as chips, allowing selection of up to two
   Widget _buildModelSelector() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -105,7 +140,7 @@ class _CompareScreenState extends State<CompareScreen> {
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ValueListenableBuilder<List<ConsentModel>>(
             valueListenable: controller.selectedModels,
             builder: (context, selectedModels, child) {
@@ -136,17 +171,20 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds the dimension selection toolbar
+  ///
+  /// Allows users to switch between comparing initial consent, permissions, or revocability
   Widget _buildDimensionSelector() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: dimensions.entries.map((entry) {
-            final isSelected = selectedDimension == entry.key;
+            final isSelected = controller.selectedDimension.value == entry.key;
             return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ChoiceChip(
                 label: Row(
                   children: [
@@ -157,12 +195,12 @@ class _CompareScreenState extends State<CompareScreen> {
                         ? AppTheme.primaryColor 
                         : AppTheme.textSecondaryColor,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(entry.value['title'] as String),
                   ],
                 ),
                 selected: isSelected,
-                onSelected: (_) => setState(() => selectedDimension = entry.key),
+                onSelected: (_) => controller.changeDimension(entry.key),
                 selectedColor: AppTheme.primaryColor.withOpacity(0.1),
                 backgroundColor: Colors.grey[100],
                 labelStyle: TextStyle(
@@ -179,6 +217,9 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds the comparison section
+  ///
+  /// Contains the dimension description and the main comparison content
   Widget _buildComparison(List<ConsentModel> models) {
     return Column(
       children: [
@@ -190,15 +231,17 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds the description text for the currently selected dimension
   Widget _buildDimensionDescription() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       color: Colors.grey[100],
       child: Text(
-         dimensions[selectedDimension]?['description'] as String? ?? 'Select a dimension to compare',
+        dimensions[controller.selectedDimension.value]?['description'] as String? ?? 
+          'Select a dimension to compare',
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: const TextStyle(
           color: AppTheme.textSecondaryColor,
           fontStyle: FontStyle.italic,
         ),
@@ -206,6 +249,10 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds the main comparison content area showing models side by side
+  ///
+  /// Retrieves appropriate feature data based on the selected dimension
+  /// and displays it in a side-by-side card layout
   Widget _buildComparisonContent(List<ConsentModel> models) {
     final features = {
       'initial': controller.model.getInitialConsentProcess,
@@ -214,21 +261,21 @@ class _CompareScreenState extends State<CompareScreen> {
     };
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: models.map((model) {
-          final modelFeatures = features[selectedDimension]!(model);
+          final modelFeatures = features[controller.selectedDimension.value]!(model);
           
           return Expanded(
             child: Card(
-              margin: EdgeInsets.all(8),
+              margin: const EdgeInsets.all(8),
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -239,7 +286,7 @@ class _CompareScreenState extends State<CompareScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Divider(height: 32),
+                    const Divider(height: 32),
                     Expanded(
                       child: SingleChildScrollView(
                         child: _buildFeatureList(modelFeatures),
@@ -255,6 +302,10 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds a list of features for a consent model
+  ///
+  /// Handles different feature structures including special case for Affirmative Consent
+  /// which uses a pathway-based structure
   Widget _buildFeatureList(Map<String, dynamic> modelFeatures) {
     List<Widget> featureWidgets = [];
 
@@ -262,7 +313,7 @@ class _CompareScreenState extends State<CompareScreen> {
     if (modelFeatures['type'] == 'pathways') {
       featureWidgets.addAll([
         _buildPathwaySection(modelFeatures['pathway1']),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildPathwaySection(modelFeatures['pathway2']),
       ]);
     } else {
@@ -275,9 +326,9 @@ class _CompareScreenState extends State<CompareScreen> {
         );
       }
 
-      // Sub features (if any)
+      // Sub features 
       if (modelFeatures['sub'] != null && (modelFeatures['sub'] as List<String>).isNotEmpty) {
-        featureWidgets.add(SizedBox(height: 8));
+        featureWidgets.add(const SizedBox(height: 8));
         featureWidgets.addAll(
           (modelFeatures['sub'] as List<String>).map((feature) => 
             _buildFeatureItem(feature, true)
@@ -285,9 +336,9 @@ class _CompareScreenState extends State<CompareScreen> {
         );
       }
 
-      // Additional features (if any)
+      // Additional features 
       if (modelFeatures['additional'] != null) {
-        featureWidgets.add(SizedBox(height: 8));
+        featureWidgets.add(const SizedBox(height: 8));
         featureWidgets.addAll(
           (modelFeatures['additional'] as List<String>).map((feature) => 
             _buildFeatureItem(feature, false)
@@ -302,35 +353,37 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds a pathway section for Affirmative Consent
+
   Widget _buildPathwaySection(Map<String, dynamic> pathwayData) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             pathwayData['title'],
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimaryColor,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ...((pathwayData['steps'] as List<String>).map((step) => 
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    margin: EdgeInsets.only(top: 6, right: 8),
+                    margin: const EdgeInsets.only(top: 6, right: 8),
                     width: 6,
                     height: 6,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryColor,
                       shape: BoxShape.circle,
                     ),
@@ -338,7 +391,7 @@ class _CompareScreenState extends State<CompareScreen> {
                   Expanded(
                     child: Text(
                       step,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppTheme.textPrimaryColor,
                         height: 1.5,
                       ),
@@ -353,14 +406,15 @@ class _CompareScreenState extends State<CompareScreen> {
     );
   }
 
+  /// Builds a single feature item with a bullet point
   Widget _buildFeatureItem(String feature, bool isSubFeature) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: EdgeInsets.only(top: 6, right: 8),
+            margin: const EdgeInsets.only(top: 6, right: 8),
             width: isSubFeature ? 4 : 6,
             height: isSubFeature ? 4 : 6,
             decoration: BoxDecoration(
@@ -393,18 +447,18 @@ class _CompareScreenState extends State<CompareScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.compare_arrows,
               size: 64,
               color: AppTheme.primaryColor,
             ),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Text(
             'Choose Two Models',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -412,8 +466,8 @@ class _CompareScreenState extends State<CompareScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
+          const SizedBox(height: 8),
+          const Text(
             'Select two consent models to explore their unique characteristics',
             textAlign: TextAlign.center,
             style: TextStyle(

@@ -2,9 +2,12 @@
 
 import 'consent_models.dart';
 
+// Model for the compare screen, containing information about consent models.
 class CompareScreenModel {
+  // List of available consent models.
   final List<ConsentModel> consentModels = ConsentModelList.getAvailableModels();
   
+  // Returns a map describing the initial consent process for a given model.
   Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
     switch (model.name) {
       case 'Informed Consent':
@@ -24,7 +27,6 @@ class CompareScreenModel {
             'User cannot proceed without acknowledging all risks'
           ]
         };
-
       case 'Affirmative Consent':
         return {
           'type': 'pathways',
@@ -45,7 +47,6 @@ class CompareScreenModel {
             ]
           }
         };
-
       case 'Dynamic Consent':
         return {
           'main': <String>[
@@ -55,7 +56,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Granular Consent':
         return {
           'main': <String>[
@@ -71,7 +71,6 @@ class CompareScreenModel {
             'The sender can customise each control setting'
           ]
         };
-
       case 'Implied Consent':
         return {
           'main': <String>[
@@ -84,6 +83,7 @@ class CompareScreenModel {
     return {'main': <String>[], 'sub': <String>[]};
   }
 
+  // Returns a map describing the control mechanisms for a given model.
   Map<String, List<String>> getControlMechanisms(ConsentModel model) {
     switch (model.name) {
       case 'Informed Consent': 
@@ -93,7 +93,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Affirmative Consent':
         return {
           'main': <String>[
@@ -101,7 +100,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Dynamic Consent':
         return {
           'main': <String>[
@@ -109,7 +107,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Granular Consent':
         return {
           'main': <String>[
@@ -117,7 +114,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Implied Consent':
         return {
           'main': <String>[
@@ -129,6 +125,7 @@ class CompareScreenModel {
     return {'main': <String>[], 'sub': <String>[]};
   }
 
+  // Returns a map describing the consent modification capabilities for a given model.
   Map<String, List<String>> getConsentModification(ConsentModel model) {
     switch (model.name) {
       case 'Informed Consent':
@@ -136,13 +133,11 @@ class CompareScreenModel {
           'main': <String>['No mechanism for modifying initial consent'],
           'sub': <String>[]
         };
-
       case 'Affirmative Consent':
         return {
           'main': <String>['No mechanism for modifying initial consent'],
           'sub': <String>[]
         };
-
       case 'Dynamic Consent':
         return {
           'main': <String>[
@@ -150,7 +145,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Granular Consent':
         return {
           'main': <String>[
@@ -158,7 +152,6 @@ class CompareScreenModel {
           ],
           'sub': <String>[]
         };
-
       case 'Implied Consent':
         return {
           'main': <String>['No mechanism for modifying initial consent'],
