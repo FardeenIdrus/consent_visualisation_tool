@@ -17,7 +17,7 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
 }
 
 
-  Future<bool> sendMessage(String? text, {Uint8List? imageBytes}) async {
+  Future<bool> sendMessage(String? text, {Uint8List? imageBytes, bool recipientRequested = false}) async {
     if (model.currentModel == null) return false;
 
     switch (model.currentModel!.name) {
@@ -61,7 +61,7 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
         return _addMessage(
           text,
           imageBytes,
-          additionalData: {'requiresRecipientConsent': true}
+          additionalData: {'requiresRecipientConsent': !recipientRequested,}
         );
 
       case 'Dynamic Consent':

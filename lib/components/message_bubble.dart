@@ -45,13 +45,12 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isReceiver && 
-        message.type == MessageType.image && 
-        message.consentModel?.name == 'Affirmative Consent' &&
-        message.additionalData?['requiresRecipientConsent'] == true) {
-      return _buildConsentRequest(context);
-    }
-
+if (isReceiver &&
+    message.type == MessageType.image &&
+    message.consentModel?.name == 'Affirmative Consent' &&
+    message.additionalData?['requiresRecipientConsent'] == true) {
+  return _buildConsentRequest(context);
+}
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       alignment: isReceiver ? Alignment.centerLeft : Alignment.centerRight,

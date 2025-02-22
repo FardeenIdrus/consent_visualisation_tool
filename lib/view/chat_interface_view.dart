@@ -127,13 +127,14 @@ void _showImageRequestDialog(SimulationMessage requestMessage) {
     }
   }
 
-  Future<void> _handleSendMessage(String text) async {
-    if (text.isEmpty && _pendingImageBytes == null) return;
+Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) async {
+  if (text.isEmpty && _pendingImageBytes == null) return;
 
-    final sent = await _controller.sendMessage(
-      text.isNotEmpty ? text : null,
-      imageBytes: _pendingImageBytes,
-    );
+  final sent = await _controller.sendMessage(
+    text.isNotEmpty ? text : null,
+    imageBytes: _pendingImageBytes,
+    recipientRequested: recipientRequested, // Pass the flag to the controller
+  );
 
     if (sent) {
       setState(() {
@@ -319,16 +320,16 @@ Widget _buildChatView({required bool isSender}) {
                           child: Text('Decline'),
                         ),
                         ElevatedButton(
-                          onPressed: () async {
-                            Navigator.of(dialogContext).pop();
-                            _model.deleteMessage(imageRequestMessage);
-                            await _pickImage();
-                            if (_pendingImageBytes != null) {
-                              await _handleSendMessage('');
-                            }
-                          },
-                          child: Text('Share Image'),
-                        ),
+  onPressed: () async {
+    Navigator.of(dialogContext).pop();
+    _model.deleteMessage(imageRequestMessage);
+    await _pickImage();
+    if (_pendingImageBytes != null) {
+      await _handleSendMessage('', recipientRequested: true); // Add the flag here
+    }
+  },
+  child: Text('Share Image'),
+),
                       ],
                     ),
                   );
