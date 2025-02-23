@@ -1,4 +1,4 @@
-import 'package:consent_visualisation_tool/model/consent_flow.dart';
+import 'package:consent_visualisation_tool/view/consent_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:consent_visualisation_tool/controller/compare_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
