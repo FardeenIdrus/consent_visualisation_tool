@@ -33,17 +33,21 @@ class CompareScreenModel {
           'pathway1': {
             'title': 'Sender-Initiated Sharing',
             'steps': <String>[
-              'Sender confirms intent to share image',
+              'The sender is presented with the same risk disclosure as Informed Consent',
+              'The sender accepts all risks',
+              'The sender shares an image with the recipient',
               'Recipient must actively click "Accept" to proceed',
-              'Clear "Decline" option is provided'
+              'Clear "Decline" option is provided to the recipient'
             ]
           },
           'pathway2': {
-            'title': 'Recipient Requests Image',
+            'title': 'Recipient Requests Image from Sender',
             'steps': <String>[
               'Recipient requests to receive image',
+              'The sender can accept the request',
+              'The sender is presented with the same risk disclosure as Informed Consent',
               'Sender must explicitly agree to share',
-              'Clear "Decline" option is provided'
+              'Clear "Decline" option is provided to the sender'
             ]
           }
         };
