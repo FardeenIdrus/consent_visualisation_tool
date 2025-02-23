@@ -73,9 +73,8 @@ case 'Dynamic Consent':
 case 'Granular Consent':
   return {
     'main': <String>[
-      'The sender is presented with a list of permissions settings:',
+      'The sender is presented with a list of permissions settings',
       'The sender must configure detailed permission settings',
-      'The sender must specify sharing conditions before proceeding'
     ],
     'sub': <String>[
       'Time limits for content access',
