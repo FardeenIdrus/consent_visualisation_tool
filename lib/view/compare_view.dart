@@ -1,43 +1,20 @@
-// lib/view/compare_view.dart
+import 'package:consent_visualisation_tool/model/consent_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:consent_visualisation_tool/controller/compare_controller.dart';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/view/chat_interface_view.dart';
 import '../theme/app_theme.dart';
 
-/// A screen that allows users to compare two consent models in a flowchart-style layout.
-/// When two models are selected, the three dimensions appear as vertical expandable blocks.
-/// Each block shows a header with a summary and, when expanded, displays a side-by-side
-/// comparison of the details for the two models.
 class CompareScreen extends StatefulWidget {
   const CompareScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _CompareScreenState createState() => _CompareScreenState();
 }
 
 class _CompareScreenState extends State<CompareScreen> {
   final CompareController controller = CompareController();
-
-  // Definition of dimensions with metadata.
-  final Map<String, Map<String, Object>> dimensions = {
-    'initial': {
-      'title': 'Initial Consent Process',
-      'description': 'How consent is first established and obtained',
-      'icon': Icons.start_outlined,
-    },
-    'permissions': {
-      'title': 'Permission Granularity',
-      'description': 'Technical controls and restrictions at the point of sharing',
-      'icon': Icons.security_outlined,
-    },
-    'revocability': {
-      'title': 'Modification & Revocation',
-      'description': 'Post-sharing control and modification options',
-      'icon': Icons.change_circle_outlined,
-    },
-  };
+  String selectedDimension = 'initial';
 
   @override
   void initState() {
@@ -53,6 +30,69 @@ class _CompareScreenState extends State<CompareScreen> {
     super.dispose();
   }
 
+  List<ConsentStep> _getStepsForModel(ConsentModel model) {
+    final modelData = controller.getFeatures(model, selectedDimension);
+    
+    if (modelData['type'] == 'pathways') {
+      return _buildPathwaySteps(modelData);
+    }
+    
+    return _buildStandardSteps(modelData);
+  }
+
+  List<ConsentStep> _buildPathwaySteps(Map<String, dynamic> modelData) {
+    return [
+      ConsentStep(
+        title: modelData['pathway1']['title'],
+        icon: Icons.person_add_outlined,
+        details: modelData['pathway1']['steps'],
+      ),
+      ConsentStep(
+        title: modelData['pathway2']['title'],
+        icon: Icons.people_outlined,
+        details: modelData['pathway2']['steps'],
+      ),
+    ];
+  }
+
+List<ConsentStep> _buildStandardSteps(Map<String, dynamic> modelData) {
+    List<ConsentStep> steps = [];
+
+    if (modelData['main'] != null) {
+      steps.add(ConsentStep(
+        title: 'Primary Features',
+        icon: Icons.check_circle_outline,
+        details: modelData['main'],
+      ));
+    }
+
+    if (modelData['risk_disclosure'] != null) {
+      steps.add(ConsentStep(
+        title: 'Risk Disclosure',
+        icon: Icons.warning_outlined,
+        details: modelData['risk_disclosure'],
+      ));
+    }
+
+    if (modelData['sub'] != null && modelData['sub'].isNotEmpty) {
+      steps.add(ConsentStep(
+        title: 'Capabilities',
+        icon: Icons.settings_outlined,
+        details: modelData['sub'],
+      ));
+    }
+
+    if (modelData['additional'] != null) {
+      steps.add(ConsentStep(
+        title: 'Key Considerations',
+        icon: Icons.info_outline,
+        details: modelData['additional'],
+      ));
+    }
+
+    return steps;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +101,7 @@ class _CompareScreenState extends State<CompareScreen> {
       body: Column(
         children: [
           _buildModelSelector(),
+          _buildDimensionSelector(),
           Expanded(
             child: ValueListenableBuilder<List<ConsentModel>>(
               valueListenable: controller.selectedModels,
@@ -68,12 +109,85 @@ class _CompareScreenState extends State<CompareScreen> {
                 if (selectedModels.length != 2) {
                   return _buildSelectionPrompt();
                 }
-                return _buildFlowchart(selectedModels);
+                return _buildComparison(selectedModels);
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDimensionSelector() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      color: Colors.white,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildDimensionButton('Initial Process', 'initial', Icons.start_outlined),
+          _buildDimensionButton('Point of Sharing', 'permissions', Icons.security_outlined),
+          _buildDimensionButton('Post-Sharing', 'revocability', Icons.change_circle_outlined),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDimensionButton(String title, String dimension, IconData icon) {
+    final isSelected = selectedDimension == dimension;
+    return InkWell(
+      onTap: () => setState(() => selectedDimension = dimension),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppTheme.primaryColor : Colors.grey,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComparison(List<ConsentModel> models) {
+    return Row(
+      children: [
+        Expanded(
+          child: ConsentFlowVisualization(
+            modelName: models[0].name,
+            steps: _getStepsForModel(models[0]),
+          ),
+        ),
+        Container(
+          width: 2,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          color: Colors.grey[300],
+        ),
+        Expanded(
+          child: ConsentFlowVisualization(
+            modelName: models[1].name,
+            steps: _getStepsForModel(models[1]),
+          ),
+        ),
+      ],
     );
   }
 
@@ -206,263 +320,9 @@ class _CompareScreenState extends State<CompareScreen> {
       ),
     );
   }
-
-  /// Builds the vertical flowchart.
-  Widget _buildFlowchart(List<ConsentModel> selectedModels) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: dimensions.keys.length,
-      separatorBuilder: (context, index) => Center(
-        child: Icon(Icons.arrow_downward, color: AppTheme.primaryColor, size: 30),
-      ),
-      itemBuilder: (context, index) {
-        final dimensionKey = dimensions.keys.elementAt(index);
-        final dimensionData = dimensions[dimensionKey]!;
-        return FlowchartBlock(
-          dimensionKey: dimensionKey,
-          dimensionTitle: dimensionData['title'] as String,
-          dimensionDescription: dimensionData['description'] as String,
-          modelA: selectedModels[0],
-          modelB: selectedModels[1],
-          controller: controller,
-        );
-      },
-    );
-  }
 }
 
-/// A widget representing an individual flowchart block for one comparison dimension.
-class FlowchartBlock extends StatefulWidget {
-  final String dimensionKey;
-  final String dimensionTitle;
-  final String dimensionDescription;
-  final ConsentModel modelA;
-  final ConsentModel modelB;
-  final CompareController controller;
 
-  const FlowchartBlock({
-    super.key,
-    required this.dimensionKey,
-    required this.dimensionTitle,
-    required this.dimensionDescription,
-    required this.modelA,
-    required this.modelB,
-    required this.controller,
-  });
-
-  @override
-  _FlowchartBlockState createState() => _FlowchartBlockState();
-}
-
-class _FlowchartBlockState extends State<FlowchartBlock> {
-  bool isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    // Retrieve feature maps based on dimension.
-    Map<String, dynamic> getFeatures(ConsentModel model) {
-      switch (widget.dimensionKey) {
-        case 'initial':
-          return widget.controller.model.getInitialConsentProcess(model);
-        case 'permissions':
-          return widget.controller.model.getControlMechanisms(model);
-        case 'revocability':
-          return widget.controller.model.getConsentModification(model);
-        default:
-          return {'main': <String>[], 'sub': <String>[]};
-      }
-    }
-    final featuresA = getFeatures(widget.modelA);
-    final featuresB = getFeatures(widget.modelB);
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            isExpanded = !isExpanded;
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header: Icon, dimension title (in black), and expand/collapse indicator.
-              Row(
-                children: [
-                  Icon(
-                    widget.dimensionKey == 'initial'
-                        ? Icons.start_outlined
-                        : widget.dimensionKey == 'permissions'
-                            ? Icons.security_outlined
-                            : Icons.change_circle_outlined,
-                    color: AppTheme.primaryColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.dimensionTitle,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppTheme.primaryColor,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Dimension description in black.
-              Text(
-                widget.dimensionDescription,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                ),
-              ),
-              if (isExpanded) ...[
-                const SizedBox(height: 16),
-                // Side-by-side comparison of features.
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: _buildFeaturesColumn(featuresA, widget.modelA.name)),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildFeaturesColumn(featuresB, widget.modelB.name)),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Builds the feature column for a given model.
-  Widget _buildFeaturesColumn(Map<String, dynamic> features, String modelName) {
-    // Check for pathways type (for Affirmative Consent, etc.)
-    if (features.containsKey('type') && features['type'] == 'pathways') {
-      return _buildPathwaysColumn(features, modelName);
-    }
-    List<Widget> items = [];
-    // Model name in blue.
-    items.add(Text(
-      modelName,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.blue,
-      ),
-    ));
-    items.add(const SizedBox(height: 8));
-    // "Main" features in black, bold.
-    if (features['main'] != null) {
-      items.addAll((features['main'] as List<String>).map((item) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              "• " + item,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )));
-    }
-    // "Sub" features in black, italic.
-    if (features['sub'] != null) {
-      items.addAll((features['sub'] as List<String>).map((item) => Padding(
-            padding: const EdgeInsets.only(left: 16, top: 2, bottom: 2),
-            child: Text(
-              "◦ " + item,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          )));
-    }
-    // "Additional" features in black, bold.
-    if (features['additional'] != null) {
-      items.addAll((features['additional'] as List<String>).map((item) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              "• " + item,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )));
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: items,
-    );
-  }
-
-  /// Builds a pathways column for models that use the 'pathways' type.
-  Widget _buildPathwaysColumn(Map<String, dynamic> features, String modelName) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          modelName,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(height: 8),
-        _buildPathwayItem(features['pathway1']),
-        const SizedBox(height: 8),
-        _buildPathwayItem(features['pathway2']),
-      ],
-    );
-  }
-
-  /// Builds an individual pathway item.
-  Widget _buildPathwayItem(Map<String, dynamic> pathwayData) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          pathwayData['title'] as String,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: (pathwayData['steps'] as List<String>)
-              .map((step) => Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 2, bottom: 2),
-                    child: Text(
-                      "• " + step,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-}
 
 
 
