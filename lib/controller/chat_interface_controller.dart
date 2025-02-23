@@ -163,35 +163,35 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
             // Risk Disclosure Sections
             _buildRiskDisclosureSection(
               title: 'Digital Permanence',
-              description: 'Once shared, images can persist indefinitely in digital spaces.',
+              description: 'Once shared, images can persist indefinitely in digital spaces, creating potential for future misuse.',
               value: _understandPermanence,
               onChanged: (value) => setState(() => _understandPermanence = value!),
             ),
             
             _buildRiskDisclosureSection(
               title: 'Distribution Risks',
-              description: 'Images can be copied, saved, or redistributed without your direct control.',
+              description: 'Once shared, images can be copied, saved, or redistributed without your discretion, even if initially shared within a consensual exchange.',
               value: _understandDistribution,
               onChanged: (value) => setState(() => _understandDistribution = value!),
             ),
             
             _buildRiskDisclosureSection(
               title: 'Control Limitations',
-              description: 'You have limited ability to control the spread of shared images.',
+              description: 'After sharing, you will have limited ability to control how your images are stored, shared, or used by others.',
               value: _understandControlRisks,
               onChanged: (value) => setState(() => _understandControlRisks = value!),
             ),
             
             _buildRiskDisclosureSection(
               title: 'Future Impact',
-              description: 'Shared images may have long-term consequences for personal and professional life.',
+              description: 'Shared images may have long-term consequences for personal relationships, professional opportunities, and overall wellbeing.',
               value: _understandFutureImpact,
               onChanged: (value) => setState(() => _understandFutureImpact = value!),
             ),
             
             _buildRiskDisclosureSection(
               title: 'Security Risks',
-              description: 'There is a potential for third-party interception or unauthorized access.',
+              description: ' There is potential for third-party interception, unauthorized access, or data breaches of shared images.',
               value: _understandSecurityRisks,
               onChanged: (value) => setState(() => _understandSecurityRisks = value!),
             ),

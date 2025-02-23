@@ -13,15 +13,15 @@ class CompareScreenModel {
       case 'Informed Consent':
         return {
           'main': <String>[
-            'Risk disclosure panel highlighting five key areas:',
+            'The sender is presented with a risk disclosure panel highlighting five key areas:',
           ],
-          'sub': <String>[
-            'Digital Permanence',
-            'Distribution Risks',
-            'Control Limitations',
-            'Future Impact',
-            'Security Risks'
-          ],
+           'sub': <String>[
+      'Digital Permanence: Once shared, images can persist indefinitely in digital spaces, creating potential for future misuse.',
+      'Distribution Risks: Once shared, images can be copied, saved, or redistributed without your discretion, even if initially shared within a consensual exchange.',
+      'Control Limitations: After sharing, you will have limited ability to control how your images are stored, shared, or used by others.',
+      'Future Impact: Shared images may have long-term consequences for personal relationships, professional opportunities, and overall wellbeing.',
+      'Security Risks:  There is potential for third-party interception, unauthorized access, or data breaches of shared images.'
+    ],
           'additional': <String>[
             'User must check acknowledgment boxes for each risk',
             'User cannot proceed without acknowledging all risks'
@@ -86,13 +86,19 @@ class CompareScreenModel {
   // Returns a map describing the control mechanisms for a given model.
   Map<String, List<String>> getControlMechanisms(ConsentModel model) {
     switch (model.name) {
-      case 'Informed Consent': 
-        return {
-          'main': <String>[
-            'The sender cannot set specific control restrictions (such as preventing saving, sharing, and time-limited view)'
-          ],
-          'sub': <String>[]
-        };
+case 'Informed Consent':
+  return {
+    'main': <String>[
+      'At the point of sharing:',
+      'Sharing is permitted once risks are acknowledged',
+      'No technical controls are available to the sender to protect their content'
+    ],
+    'sub': <String>[
+      'Cannot set time limits for content access',
+      'Cannot prevent recipients from saving content',
+      'Cannot restrict recipients from sharing content'
+    ],
+  };
       case 'Affirmative Consent':
         return {
           'main': <String>[
@@ -128,11 +134,20 @@ class CompareScreenModel {
   // Returns a map describing the consent modification capabilities for a given model.
   Map<String, List<String>> getConsentModification(ConsentModel model) {
     switch (model.name) {
-      case 'Informed Consent':
-        return {
-          'main': <String>['No mechanism for modifying initial consent'],
-          'sub': <String>[]
-        };
+case 'Informed Consent':
+  return {
+    'main': <String>[
+      'After sharing:',
+    ],
+    'sub': <String>[
+      'The sender has no ability to withdraw shared content',
+      'The sender has no ability to change access permissions',
+      'The sender has no ability to track how content is being used'
+    ],
+    'additional': <String>[
+      'Once content is shared, sender loses technical control'
+    ]
+  };
       case 'Affirmative Consent':
         return {
           'main': <String>['No mechanism for modifying initial consent'],
