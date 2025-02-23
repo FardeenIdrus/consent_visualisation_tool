@@ -126,6 +126,7 @@ Future<bool> deleteMessage(SimulationMessage message) async {
     return true;
   }
 }
+
 class InformedConsentDialog extends StatefulWidget {
   @override
   _InformedConsentDialogState createState() => _InformedConsentDialogState();
@@ -133,18 +134,57 @@ class InformedConsentDialog extends StatefulWidget {
 
 class _InformedConsentDialogState extends State<InformedConsentDialog> {
   // Risk understanding checkboxes
-  bool _understandPermanence = false;
-  bool _understandDistribution = false;
-  bool _understandControlRisks = false;
-  bool _understandFutureImpact = false;
-  bool _understandSecurityRisks = false;
+  final List<Map<String, dynamic>> _riskItems = [
+    {
+      'title': 'Digital Permanence',
+      'description': 'Once shared, images can persist indefinitely in digital spaces',
+      'icon': Icons.cloud_outlined,
+      'color': Colors.blue,
+    },
+    {
+      'title': 'Distribution Risks',
+      'description': 'Images can be copied, saved, or redistributed without direct control',
+      'icon': Icons.share_outlined,
+      'color': Colors.orange,
+    },
+    {
+      'title': 'Control Limitations',
+      'description': 'Limited ability to control the spread of shared images',
+      'icon': Icons.lock_open_outlined,
+      'color': Colors.red,
+    },
+    {
+      'title': 'Future Impact',
+      'description': 'Potential long-term consequences for personal and professional life',
+      'icon': Icons.timeline_outlined,
+      'color': Colors.purple,
+    },
+    {
+      'title': 'Security Risks',
+      'description': 'Potential for third-party interception or unauthorized access',
+      'icon': Icons.security_outlined,
+      'color': Colors.green,
+    }
+  ];
+
+  // Checkbox state for each risk
+  late List<bool> _riskAcknowledged;
+
+  @override
+  void initState() {
+    super.initState();
+    _riskAcknowledged = List.filled(_riskItems.length, false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
         'Informed Consent for Image Sharing',
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.deepPurple,
+        ),
       ),
       content: SingleChildScrollView(
         child: Column(
@@ -154,67 +194,66 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
             Text(
               'Please carefully review and acknowledge the following risks:',
               style: TextStyle(
-                fontWeight: FontWeight.w500,
                 color: Colors.grey[800],
+                fontStyle: FontStyle.italic,
               ),
             ),
             SizedBox(height: 16),
             
-            // Risk Disclosure Sections
-            _buildRiskDisclosureSection(
-              title: 'Digital Permanence',
-              description: 'Once shared, images can persist indefinitely in digital spaces, creating potential for future misuse.',
-              value: _understandPermanence,
-              onChanged: (value) => setState(() => _understandPermanence = value!),
-            ),
-            
-            _buildRiskDisclosureSection(
-              title: 'Distribution Risks',
-              description: 'Once shared, images can be copied, saved, or redistributed without your discretion, even if initially shared within a consensual exchange.',
-              value: _understandDistribution,
-              onChanged: (value) => setState(() => _understandDistribution = value!),
-            ),
-            
-            _buildRiskDisclosureSection(
-              title: 'Control Limitations',
-              description: 'After sharing, you will have limited ability to control how your images are stored, shared, or used by others.',
-              value: _understandControlRisks,
-              onChanged: (value) => setState(() => _understandControlRisks = value!),
-            ),
-            
-            _buildRiskDisclosureSection(
-              title: 'Future Impact',
-              description: 'Shared images may have long-term consequences for personal relationships, professional opportunities, and overall wellbeing.',
-              value: _understandFutureImpact,
-              onChanged: (value) => setState(() => _understandFutureImpact = value!),
-            ),
-            
-            _buildRiskDisclosureSection(
-              title: 'Security Risks',
-              description: ' There is potential for third-party interception, unauthorized access, or data breaches of shared images.',
-              value: _understandSecurityRisks,
-              onChanged: (value) => setState(() => _understandSecurityRisks = value!),
-            ),
+            // Risk Disclosure Cards
+            ...List.generate(_riskItems.length, (index) {
+              final risk = _riskItems[index];
+              return _buildRiskCard(
+                title: risk['title'],
+                description: risk['description'],
+                icon: risk['icon'],
+                color: risk['color'],
+                value: _riskAcknowledged[index],
+                onChanged: (value) {
+                  setState(() {
+                    _riskAcknowledged[index] = value ?? false;
+                  });
+                },
+              );
+            }),
             
             SizedBox(height: 16),
             
-            // Additional Information Section
-            Text(
-              'Key Implications:',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.deepOrange,
+            // Key Implications Section
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                '• Images may be stored indefinitely\n'
-                '• Content can be shared without your explicit consent\n'
-                '• Potential future reputational risks',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.warning_outlined, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text(
+                        'Key Implications',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '• Images may be stored indefinitely\n'
+                    '• Content can be shared without your explicit consent\n'
+                    '• Potential future reputational risks',
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      height: 1.5,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -223,110 +262,260 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text('Cancel'),
+          child: Text('Cancel', style: TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
           onPressed: _allRisksAcknowledged()
             ? () => Navigator.of(context).pop(true)
             : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _allRisksAcknowledged() ? Colors.deepPurple : Colors.grey,
+          ),
           child: Text('I Understand All Risks'),
         ),
       ],
     );
   }
 
-  Widget _buildRiskDisclosureSection({
+  Widget _buildRiskCard({
     required String title,
     required String description,
+    required IconData icon,
+    required Color color,
     required bool value,
     required Function(bool?) onChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CheckboxListTile(
-          title: Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 2),
           ),
-          subtitle: Text(
-            description,
-            style: TextStyle(color: Colors.grey[700]),
-          ),
-          value: value,
-          onChanged: onChanged,
-          controlAffinity: ListTileControlAffinity.leading,
+        ],
+        border: Border.all(
+          color: value ? color.withOpacity(0.5) : Colors.grey.withOpacity(0.2),
+          width: 1.5,
         ),
-        Divider(height: 1),
-      ],
+      ),
+      child: CheckboxListTile(
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 24,
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        value: value,
+        onChanged: onChanged,
+        controlAffinity: ListTileControlAffinity.trailing,
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        activeColor: color,
+        checkColor: Colors.white,
+      ),
     );
   }
 
   bool _allRisksAcknowledged() {
-    return _understandPermanence &&
-           _understandDistribution &&
-           _understandControlRisks &&
-           _understandFutureImpact &&
-           _understandSecurityRisks;
+    return _riskAcknowledged.every((acknowledged) => acknowledged);
   }
 }
+
 
 class AffirmativeConsentDialog extends StatelessWidget {
   final bool isSender;
   
-  const AffirmativeConsentDialog({super.key, required this.isSender});
+  const AffirmativeConsentDialog({Key? key, required this.isSender}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(isSender ? 'Request to Share Image' : 'Request to View Image'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: _buildDialogTitle(context),
+      content: _buildDialogContent(context),
+      actions: _buildDialogActions(context),
+      contentPadding: EdgeInsets.all(24),
+      actionsPadding: EdgeInsets.only(bottom: 16, right: 16, left: 16),
+    );
+  }
+
+  Widget _buildDialogTitle(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Text(
-              isSender 
-                ? 'Do you explicitly agree to share this image?' 
-                : 'A user wants to share an image with you. Do you explicitly agree to view it?',
-              style: Theme.of(context).textTheme.bodyLarge,
+            Icon(
+              isSender ? Icons.send_outlined : Icons.visibility_outlined, 
+              color: Colors.deepPurple,
+              size: 32,
             ),
-            const SizedBox(height: 16),
-            // Building upon informed consent by providing clear information
-            Text(
-              'By agreeing, you acknowledge:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isSender ? 'Request to Share Image' : 'Request to View Image',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                  fontSize: 20,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isSender
-                ? '• The image will be shared with the recipient\n'
-                  '• You are under no obligation to agree\n'
-                  '• You have willingly chosen to share this content'
-                : '• You will receive an image from the sender\n'
-                  '• You can decline to view the content\n'
-                  '• You are under no obligation to agree',
-              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('No, I Do Not Agree'),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Yes, I Explicitly Agree'),
-        ),
+        SizedBox(height: 8),
+        Divider(color: Colors.grey[300]),
       ],
     );
+  }
+
+  Widget _buildDialogContent(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildConsentSection(context),
+        SizedBox(height: 16),
+        _buildRiskAcknowledgementSection(context),
+      ],
+    );
+  }
+
+  Widget _buildConsentSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.purple.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.purple.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isSender 
+              ? 'Confirming Intention to Share' 
+              : 'Confirming Willingness to Receive',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.purple[800],
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            isSender
+              ? 'You are about to share an intimate image. This requires explicit, enthusiastic agreement from you.'
+              : 'An intimate image has been sent to you. You have the right to decline to view the image.',
+            style: TextStyle(
+              color: Colors.grey[800],
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRiskAcknowledgementSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.warning_outlined, color: Colors.red, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Important Considerations',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red[800],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            '• This is a voluntary action\n'
+            '• No explanation is required for declining',
+            style: TextStyle(
+              color: Colors.grey[800],
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildDialogActions(BuildContext context) {
+    return [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(false),
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.grey[800],
+        ),
+        child: Text('Decline'),
+      ),
+      ElevatedButton(
+        onPressed: () => Navigator.of(context).pop(true),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          isSender ? 'Confirm Sharing' : 'Accept Image',
+        ),
+      ),
+    ];
   }
 }
 
@@ -526,7 +715,6 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
       'timeLimit': false,
       'timeLimitMinutes': 60,
       'allowScreenshots': false,
-      'addWatermark': false,
       'viewingDuration': false,
       'viewingDurationMinutes': 5,
     };

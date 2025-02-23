@@ -38,7 +38,6 @@ class ConsentModel {
         'sharingRestrictions': [
           'Prevent screenshots',
           'Prevent forwarding',
-          'Add watermark'
         ]
       },
     );
