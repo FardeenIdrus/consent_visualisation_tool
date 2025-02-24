@@ -125,7 +125,7 @@ Widget _buildHeaderSection(BuildContext context) {
         ),
         const SizedBox(height: 16),
         Text(
-          'Explore and understand consent models in the context of digital intimate image exchanges',
+          'Consent models in the context of digital intimate image exchange',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.white70,
               ),

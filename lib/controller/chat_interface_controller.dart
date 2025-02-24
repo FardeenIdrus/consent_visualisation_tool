@@ -748,7 +748,7 @@ Widget build(BuildContext context) {
             _buildPermissionSection('Sharing Controls'),
             SwitchListTile(
               title: Text('Allow Forwarding'),
-              subtitle: Text('Recipient can forward the content'),
+              subtitle: Text('Recipient can share the content to other users'),
               value: settings['allowForwarding'],
               onChanged: (value) => setState(() => settings['allowForwarding'] = value),
             ),

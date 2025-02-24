@@ -120,50 +120,54 @@ List<ConsentStep> _buildStandardSteps(Map<String, dynamic> modelData) {
 }
 
   // Builds the dimension selector row.
-  Widget _buildDimensionSelector() {
-    return Container(
+Widget _buildDimensionSelector() {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
       color: Colors.white,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: dimensions.entries.map((entry) {
           final isSelected = controller.selectedDimension.value == entry.key;
-          return InkWell(
-            onTap: () {
-              controller.changeDimension(entry.key);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: InkWell(
+              onTap: () => controller.changeDimension(entry.key),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    entry.value['icon'] as IconData,
-                    color: isSelected ? AppTheme.primaryColor : Colors.grey,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    entry.value['title'] as String,
-                    style: TextStyle(
-                      color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                child: Row(
+                  children: [
+                    Icon(
+                      entry.value['icon'] as IconData,
+                      color: isSelected ? AppTheme.primaryColor : Colors.grey,
+                      size: 20,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Text(
+                      entry.value['title'] as String,
+                      style: TextStyle(
+                        color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         }).toList(),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // Builds the dimension focus section that displays the description.
   Widget _buildDimensionDescription() {
@@ -219,39 +223,64 @@ Widget _buildComparison(List<ConsentModel> models) {
       _buildDimensionDescription(),
       const SizedBox(height: 8),
       Expanded(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SingleChildScrollView( // Wrap in SingleChildScrollView
-                  child: ConsentFlowVisualization(
-                    modelName: models[0].name,
-                    steps: _getStepsForModel(models[0]),
-                  ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 600) {
+              // For small screens, stack the panels vertically.
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ConsentFlowVisualization(
+                      modelName: models[0].name,
+                      steps: _getStepsForModel(models[0]),
+                    ),
+                    const Divider(),
+                    ConsentFlowVisualization(
+                      modelName: models[1].name,
+                      steps: _getStepsForModel(models[1]),
+                    ),
+                  ],
                 ),
-              ),
-              Container(
-                width: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                color: Colors.grey[300],
-              ),
-              Expanded(
-                child: SingleChildScrollView( // Wrap in SingleChildScrollView
-                  child: ConsentFlowVisualization(
-                    modelName: models[1].name,
-                    steps: _getStepsForModel(models[1]),
-                  ),
+              );
+            } else {
+              // For larger screens, show side-by-side.
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: ConsentFlowVisualization(
+                          modelName: models[0].name,
+                          steps: _getStepsForModel(models[0]),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      color: Colors.grey[300],
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: ConsentFlowVisualization(
+                          modelName: models[1].name,
+                          steps: _getStepsForModel(models[1]),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
+              );
+            }
+          },
         ),
       ),
     ],
   );
 }
+
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -343,8 +372,9 @@ Widget _buildComparison(List<ConsentModel> models) {
     );
   }
 
-  Widget _buildSelectionPrompt() {
-    return Center(
+Widget _buildSelectionPrompt() {
+  return SingleChildScrollView(
+    child: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -379,8 +409,10 @@ Widget _buildComparison(List<ConsentModel> models) {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

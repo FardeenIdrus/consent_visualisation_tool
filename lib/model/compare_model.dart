@@ -247,7 +247,7 @@ case 'Dynamic Consent':
       'Receives notifications for scheduled reviews'
     ],
     'additional': <String>[
-      'The sender has ontinuous control through scheduled reassessment and the ability to revoke access to shared content at any time',
+      'The sender has continuous control through scheduled reassessment and the ability to revoke access to shared content at any time',
     ]
   };
    case 'Granular Consent':

@@ -6,12 +6,13 @@ class ConsentFlowVisualization extends StatefulWidget {
   final List<ConsentStep> steps;
 
   const ConsentFlowVisualization({
-    Key? key,
+    super.key,
     required this.modelName,
     required this.steps,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _ConsentFlowVisualizationState createState() => _ConsentFlowVisualizationState();
 }
 
