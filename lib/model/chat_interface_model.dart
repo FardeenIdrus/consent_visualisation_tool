@@ -34,7 +34,7 @@ class SimulationModel {
 
   SimulationModel(this.context) {
     // Check every second for both expired messages and consent re-evaluation
-    _expiryTimer = Timer.periodic(Duration(seconds: 1), (_) {
+    _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _checkExpiredMessages();
       _checkDynamicConsent();
     });
@@ -109,7 +109,7 @@ Future<void> _checkDynamicConsent() async {
               deleteMessage(message);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text('Image has been deleted'),
                     backgroundColor: Colors.red,
                     duration: Duration(seconds: 3),
@@ -118,8 +118,6 @@ Future<void> _checkDynamicConsent() async {
               }
             }
           }
-        } catch (e) {
-          print('Error showing dialog: $e');
         } finally {
           _isShowingDialog = false;
         }
@@ -129,19 +127,6 @@ Future<void> _checkDynamicConsent() async {
 }
 
 
-  String _formatTimeSinceLastConsent(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes % 60;
-    final seconds = duration.inSeconds % 60;
-
-    if (hours > 0) {
-      return 'Time since last consent: $hours hours, $minutes minutes, $seconds seconds';
-    } else if (minutes > 0) {
-      return 'Time since last consent: $minutes minutes, $seconds seconds';
-    } else {
-      return 'Time since last consent: $seconds seconds';
-    }
-  }
 
   void addMessage(SimulationMessage message) {
     messages.add(message);
@@ -194,41 +179,41 @@ class _DynamicConsentReassessmentDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Consent Re-evaluation'),
+      title: const Text('Consent Re-evaluation'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Would you like to continue sharing this image?'),
-          SizedBox(height: 12),
+          const Text('Would you like to continue sharing this image?'),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _hoursController,
-                  decoration: InputDecoration(labelText: 'Hours'),
+                  decoration: const InputDecoration(labelText: 'Hours'),
                   keyboardType: TextInputType.number,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   controller: _minutesController,
-                  decoration: InputDecoration(labelText: 'Minutes'),
+                  decoration: const InputDecoration(labelText: 'Minutes'),
                   keyboardType: TextInputType.number,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   controller: _secondsController,
-                  decoration: InputDecoration(labelText: 'Seconds'),
+                  decoration: const InputDecoration(labelText: 'Seconds'),
                   keyboardType: TextInputType.number,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'Adjust the time for the next reassessment, or leave it unchanged.',
             style: TextStyle(color: Colors.grey[700]),
@@ -238,8 +223,8 @@ class _DynamicConsentReassessmentDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop({'continue': false}),
-          child: Text('Revoke Consent'),
           style: TextButton.styleFrom(foregroundColor: Colors.red),
+          child: const Text('Revoke Consent'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -253,7 +238,7 @@ class _DynamicConsentReassessmentDialogState
               'newTotalSeconds': newTotalSeconds > 0 ? newTotalSeconds : null
             });
           },
-          child: Text('Continue Sharing'),
+          child: const Text('Continue Sharing'),
         ),
       ],
     );

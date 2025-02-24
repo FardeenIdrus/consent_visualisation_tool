@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Consent Models Educational Platform',
       theme: AppTheme.lightTheme(), // Use the theme here
-      home: HomeScreen(),
+      home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

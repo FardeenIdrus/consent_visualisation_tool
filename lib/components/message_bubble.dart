@@ -141,14 +141,14 @@ class MessageBubble extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
                     timeRemaining,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -166,7 +166,7 @@ class MessageBubble extends StatelessWidget {
             ...controls,
             if (isDynamicConsent && !isReceiver && canDelete)
               Container(
-                margin: EdgeInsets.only(right: 8),
+                margin: const EdgeInsets.only(right: 8),
                 child: _buildActionButton(
                   icon: Icons.delete_outline,
                   enabled: true,
@@ -178,7 +178,7 @@ class MessageBubble extends StatelessWidget {
               // Save and forward buttons only for first recipient, not Recipient 2
               if (canSave)
                 Container(
-                  margin: EdgeInsets.only(right: 8),
+                  margin: const EdgeInsets.only(right: 8),
                   child: _buildActionButton(
                     icon: Icons.save_rounded,
                     enabled: true,
@@ -205,15 +205,15 @@ class MessageBubble extends StatelessWidget {
     }
 
     return Container(
-      constraints: BoxConstraints(maxWidth: 280),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: const BoxConstraints(maxWidth: 280),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         message.content,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.black87,
           fontSize: 16,
         ),
@@ -236,7 +236,7 @@ class MessageBubble extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.lock_outline, size: 20, color: Colors.grey[600]),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'Consent Required',
                 style: TextStyle(
@@ -248,8 +248,8 @@ class MessageBubble extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
-            icon: Icon(Icons.visibility),
-            label: Text('View Image'),
+            icon: const Icon(Icons.visibility),
+            label: const Text('View Image'),
             onPressed: onConsentRequest,
             style: ElevatedButton.styleFrom(
               foregroundColor: Colors.white,
@@ -283,7 +283,7 @@ class MessageBubble extends StatelessWidget {
             onTap: enabled ? onPressed : null,
             borderRadius: BorderRadius.circular(8),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -292,7 +292,7 @@ class MessageBubble extends StatelessWidget {
                     size: 20,
                     color: enabled ? Colors.white : Colors.grey[400],
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
                     label,
                     style: TextStyle(

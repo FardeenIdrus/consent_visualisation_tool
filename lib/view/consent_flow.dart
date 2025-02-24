@@ -61,7 +61,7 @@ class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
 }
 
 class ConnectorLine extends StatelessWidget {
-  const ConnectorLine({Key? key}) : super(key: key);
+  const ConnectorLine({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,11 +90,11 @@ class StepCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const StepCard({
-    Key? key,
+    super.key,
     required this.step,
     required this.isExpanded,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

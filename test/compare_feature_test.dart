@@ -305,8 +305,8 @@ group('CompareView Widget Tests', () {
   // Test that when two models are selected, the compare view displays the dimension focus and model names.
   testWidgets('model selection flow works correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const CompareScreen(),
+      const MaterialApp(
+        home: CompareScreen(),
       ),
     );
 
@@ -325,8 +325,8 @@ group('CompareView Widget Tests', () {
   // Test that changing the dimension updates the displayed comparison details.
   testWidgets('dimension changing works', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const CompareScreen(),
+      const MaterialApp(
+        home: CompareScreen(),
       ),
     );
 
@@ -347,8 +347,8 @@ group('CompareView Widget Tests', () {
   // Test navigation from the compare screen to the simulation screen.
   testWidgets('navigation to simulation works', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const CompareScreen(),
+      const MaterialApp(
+        home: CompareScreen(),
       ),
     );
 
@@ -369,8 +369,8 @@ group('CompareView Widget Tests', () {
   // New Test: Verify that when fewer than two models are selected, the selection prompt is displayed.
   testWidgets('displays selection prompt when fewer than two models are selected', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const CompareScreen(),
+      const MaterialApp(
+        home: CompareScreen(),
       ),
     );
 
@@ -383,8 +383,8 @@ group('CompareView Widget Tests', () {
   // the pathway steps are rendered by _buildPathwaySteps.
   testWidgets('renders pathway steps for Affirmative Consent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const CompareScreen(),
+      const MaterialApp(
+        home: CompareScreen(),
       ),
     );
     // Tap the chips for "Affirmative Consent" and "Granular Consent"
@@ -494,7 +494,7 @@ group('ConsentFlowVisualization Widget Tests', () {
       MaterialApp(
         theme: ThemeData(
           primaryColor: AppTheme.primaryColor,
-          colorScheme: ColorScheme.light(primary: AppTheme.primaryColor),
+          colorScheme: const ColorScheme.light(primary: AppTheme.primaryColor),
         ),
         home: Scaffold(
           body: ConsentFlowVisualization(

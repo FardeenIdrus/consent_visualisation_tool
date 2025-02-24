@@ -11,13 +11,13 @@ class ChatInput extends StatelessWidget {
   final VoidCallback onClearImage;
 
   const ChatInput({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onImagePick,
     required this.onSend,
     this.pendingImage,
     required this.onClearImage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class ChatInput extends StatelessWidget {
                       right: -10,
                       child: IconButton(
                         icon: Container(
-                          padding: EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
@@ -58,14 +58,14 @@ class ChatInput extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: Icon(Icons.close, size: 16, color: Colors.red),
+                          child: const Icon(Icons.close, size: 16, color: Colors.red),
                         ),
                         onPressed: onClearImage,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'Image ready to send',
@@ -86,7 +86,7 @@ class ChatInput extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                offset: Offset(0, -2),
+                offset: const Offset(0, -2),
                 blurRadius: 6,
                 color: Colors.black.withOpacity(0.1),
               ),
@@ -95,19 +95,19 @@ class ChatInput extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                icon: Icon(Icons.image_rounded, color: AppTheme.primaryColor),
+                icon: const Icon(Icons.image_rounded, color: AppTheme.primaryColor),
                 onPressed: onImagePick,
               ),
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
                     controller: controller,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Type a message...',
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(
@@ -119,12 +119,12 @@ class ChatInput extends StatelessWidget {
                 ),
               ),
               Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppTheme.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: Icon(Icons.send_rounded, color: Colors.white),
+                  icon: const Icon(Icons.send_rounded, color: Colors.white),
                   onPressed: onSend,
                 ),
               ),

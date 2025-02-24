@@ -11,9 +11,10 @@ import '../theme/app_theme.dart';
 import 'package:collection/collection.dart';
 
 class SimulationScreen extends StatefulWidget {
-  const SimulationScreen({Key? key}) : super(key: key);
+  const SimulationScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SimulationScreenState createState() => _SimulationScreenState();
 }
 
@@ -34,7 +35,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     _controller = SimulationController(_model, context);
     _model.currentModel = ConsentModelList.getAvailableModels().first;
 
-    _countdownTimer = Timer.periodic(Duration(seconds: 1), (_) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
         setState(() {});
       }
@@ -54,12 +55,12 @@ class _SimulationScreenState extends State<SimulationScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Clear Chat'),
-        content: Text('Are you sure you want to clear all messages?'),
+        title: const Text('Clear Chat'),
+        content: const Text('Are you sure you want to clear all messages?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -73,51 +74,12 @@ class _SimulationScreenState extends State<SimulationScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: Text('Clear'),
+            child: const Text('Clear'),
           ),
         ],
       ),
     );
   }
-void _showImageRequestDialog(SimulationMessage requestMessage) {
-  showDialog(
-    context: context,
-    barrierDismissible: false, // Prevent dismissing by tapping outside
-    builder: (context) => AlertDialog(
-      title: Text('Image Request'),
-      content: Text('The recipient has requested an image. Would you like to share?'),
-      actions: [
-        TextButton(
-          onPressed: () {
-            // Remove the request message and close dialog
-            _model.deleteMessage(requestMessage);
-            Navigator.of(context).pop();
-          },
-          child: Text('Decline'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            // Close the dialog immediately
-            Navigator.of(context).pop();
-
-            // Remove the request message 
-            _model.deleteMessage(requestMessage);
-            
-            // Trigger image pick
-            await _pickImage();
-            
-            // If an image was actually selected, send it
-            if (_pendingImageBytes != null) {
-              await _handleSendMessage('');
-            }
-          },
-          child: Text('Share Image'),
-        ),
-      ],
-    ),
-  );
-}
-
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -169,10 +131,10 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: Text('Consent Simulation'),
+      title: const Text('Consent Simulation'),
       elevation: 0,
       bottom: PreferredSize(
-        preferredSize: Size.fromHeight(48),
+        preferredSize: const Size.fromHeight(48),
         child: Container(
           decoration: BoxDecoration(
             border: Border(
@@ -200,11 +162,11 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
       child: InkWell(
         onTap: () => _pageController.animateToPage(
           index,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         ),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -229,12 +191,12 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
   Widget _buildConsentModelSelector() {
     final models = ConsentModelList.getAvailableModels();
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
             blurRadius: 6,
             color: Colors.black.withOpacity(0.1),
           ),
@@ -264,15 +226,15 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
               },
             ),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           ElevatedButton.icon(
-            icon: Icon(Icons.delete_outline, color: Colors.white),
-            label: Text('Clear Chat'),
+            icon: const Icon(Icons.delete_outline, color: Colors.white),
+            label: const Text('Clear Chat'),
             onPressed: _clearChat,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -311,15 +273,15 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
                     context: context,
                     barrierDismissible: false,
                     builder: (dialogContext) => AlertDialog(
-                      title: Text('Image Request'),
-                      content: Text('The recipient has requested an image. Would you like to share?'),
+                      title: const Text('Image Request'),
+                      content: const Text('The recipient has requested an image. Would you like to share?'),
                       actions: [
                         TextButton(
                           onPressed: () {
                             _model.deleteMessage(imageRequestMessage);
                             Navigator.of(dialogContext).pop();
                           },
-                          child: Text('Decline'),
+                          child: const Text('Decline'),
                         ),
                         ElevatedButton(
                           onPressed: () async {
@@ -330,7 +292,7 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
                               await _handleSendMessage('', recipientRequested: true);
                             }
                           },
-                          child: Text('Share Image'),
+                          child: const Text('Share Image'),
                         ),
                       ],
                     ),
@@ -340,7 +302,7 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
             }
 
             return ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[index];
@@ -357,7 +319,7 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
                     final consentGranted = await showDialog<bool>(
                       context: context,
                       barrierDismissible: false,
-                      builder: (context) => AffirmativeConsentDialog(isSender: false),
+                      builder: (context) => const AffirmativeConsentDialog(isSender: false),
                     );
                     
                     if (consentGranted == true) {
@@ -404,8 +366,8 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton.icon(
-            icon: Icon(Icons.image_search),
-            label: Text('Request Image'),
+            icon: const Icon(Icons.image_search),
+            label: const Text('Request Image'),
             onPressed: () {
               _model.addMessage(SimulationMessage(
                 content: 'Image Request: Would you like to share an image?',
@@ -418,7 +380,7 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
               ));
             },
             style: ElevatedButton.styleFrom(
-              minimumSize: Size(double.infinity, 50),
+              minimumSize: const Size(double.infinity, 50),
             ),
           ),
         ),
@@ -432,7 +394,7 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.forward_to_inbox, size: 48, color: Colors.grey[400]),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   'Forwarded messages will appear here',
                   style: TextStyle(
@@ -463,19 +425,19 @@ void _showActionAnimation(BuildContext context, String action) {
     builder: (context) => Center(
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
-        duration: Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 400),
         builder: (context, value, child) {
           return Opacity(
             opacity: value,
             child: Transform.scale(
               scale: 0.5 + (value * 0.5),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-                margin: EdgeInsets.all(32),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                margin: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       blurRadius: 20,
@@ -491,10 +453,10 @@ void _showActionAnimation(BuildContext context, String action) {
                       color: AppTheme.primaryColor,
                       size: 48,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       action == 'save' ? 'Image saved!' : 'Image forwarded!',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimaryColor,
@@ -512,7 +474,7 @@ void _showActionAnimation(BuildContext context, String action) {
 
   Overlay.of(context).insert(overlayEntry);
 
-  Future.delayed(Duration(seconds: 1), () {
+  Future.delayed(const Duration(seconds: 1), () {
     overlayEntry.remove();
   });
 }

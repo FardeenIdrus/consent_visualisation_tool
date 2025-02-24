@@ -5,9 +5,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomeScreenState createState() => _HomeScreenState();
 }
 
@@ -83,7 +84,7 @@ Widget _buildHeaderSection(BuildContext context) {
   return Container(
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      gradient: LinearGradient(
+      gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
@@ -91,7 +92,7 @@ Widget _buildHeaderSection(BuildContext context) {
           AppTheme.secondaryColor,
         ],
       ),
-      borderRadius: BorderRadius.only(
+      borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(32),
         bottomRight: Radius.circular(32),
       ),
@@ -99,7 +100,7 @@ Widget _buildHeaderSection(BuildContext context) {
         BoxShadow(
           color: AppTheme.primaryColor.withOpacity(0.3),
           blurRadius: 20,
-          offset: Offset(0, 10),
+          offset: const Offset(0, 10),
         ),
       ],
     ),
@@ -115,8 +116,8 @@ Widget _buildHeaderSection(BuildContext context) {
               ),
         ).animate(
           effects: [
-            FadeEffect(duration: Duration(milliseconds: 500)),
-            SlideEffect(
+            const FadeEffect(duration: Duration(milliseconds: 500)),
+            const SlideEffect(
               begin: Offset(0, 0.5),
               end: Offset.zero,
               duration: Duration(milliseconds: 500),
@@ -131,14 +132,14 @@ Widget _buildHeaderSection(BuildContext context) {
               ),
         ).animate(
           effects: [
-            FadeEffect(duration: Duration(milliseconds: 500)),
-            SlideEffect(
+            const FadeEffect(duration: Duration(milliseconds: 500)),
+            const SlideEffect(
               begin: Offset(0, 0.5),
               end: Offset.zero,
               duration: Duration(milliseconds: 500),
             ),
           ],
-          delay: Duration(milliseconds: 200),
+          delay: const Duration(milliseconds: 200),
         ),
       ],
     ),
@@ -164,7 +165,7 @@ Widget _buildAnimatedModeCard(BuildContext context, HomeMenuItem item, int index
                 AppTheme.backgroundColor.withOpacity(0.5),
               ],
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 15,
@@ -230,8 +231,8 @@ Widget _buildAnimatedModeCard(BuildContext context, HomeMenuItem item, int index
     ),
   ).animate(
     effects: [
-      FadeEffect(duration: Duration(milliseconds: 500)),
-      SlideEffect(
+      const FadeEffect(duration: Duration(milliseconds: 500)),
+      const SlideEffect(
         begin: Offset(0, 0.5),
         end: Offset.zero,
         duration: Duration(milliseconds: 500),

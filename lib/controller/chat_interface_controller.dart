@@ -25,7 +25,7 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
         final settings = await showDialog<Map<String, dynamic>>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => GranularConsentDialog(),
+          builder: (context) => const GranularConsentDialog(),
         );
         
         if (settings == null) return false;
@@ -35,7 +35,7 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
         final acknowledged = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => InformedConsentDialog(),
+          builder: (context) => const InformedConsentDialog(),
         );
 
         if (acknowledged != true) return false;
@@ -46,15 +46,16 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
         final informedConsent = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => InformedConsentDialog(),
+          builder: (context) => const InformedConsentDialog(),
         );
         if (informedConsent != true) return false;
 
         // Then get affirmative consent
         final affirmativeConsent = await showDialog<bool>(
+          // ignore: use_build_context_synchronously
           context: context,
           barrierDismissible: false,
-          builder: (context) => AffirmativeConsentDialog(isSender: true),
+          builder: (context) => const AffirmativeConsentDialog(isSender: true),
         );
         if (affirmativeConsent != true) return false;
 
@@ -68,7 +69,7 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
         final settings = await showDialog<Map<String, dynamic>>(
           context: context,
           barrierDismissible: false,
-          builder: (context) => DynamicConsentDialog(),
+          builder: (context) => const DynamicConsentDialog(),
         );
         
         if (settings == null) return false;
@@ -89,17 +90,17 @@ Future<bool> deleteMessage(SimulationMessage message) async {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Delete Message'),
-          content: Text('Are you sure you want to delete this message? This action cannot be undone.'),
+          title: const Text('Delete Message'),
+          content: const Text('Are you sure you want to delete this message? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: Text('Delete'),
+              child: const Text('Delete'),
             ),
           ],
         ),
@@ -128,7 +129,10 @@ Future<bool> deleteMessage(SimulationMessage message) async {
 }
 
 class InformedConsentDialog extends StatefulWidget {
+  const InformedConsentDialog({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _InformedConsentDialogState createState() => _InformedConsentDialogState();
 }
 
@@ -179,7 +183,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
+      title: const Text(
         'Informed Consent for Image Sharing',
         style: TextStyle(
           fontWeight: FontWeight.bold,
@@ -198,7 +202,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
                 fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             // Risk Disclosure Cards
             ...List.generate(_riskItems.length, (index) {
@@ -217,11 +221,11 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
               );
             }),
             
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             // Key Implications Section
             Container(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -230,7 +234,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.warning_outlined, color: Colors.red),
                       SizedBox(width: 8),
@@ -243,7 +247,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '• Images may be stored indefinitely\n'
                     '• Content can be shared without your explicit consent\n'
@@ -262,7 +266,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+          child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
           onPressed: _allRisksAcknowledged()
@@ -271,7 +275,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: _allRisksAcknowledged() ? Colors.deepPurple : Colors.grey,
           ),
-          child: Text('I Understand All Risks'),
+          child: const Text('I Understand All Risks'),
         ),
       ],
     );
@@ -286,7 +290,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
     required Function(bool?) onChanged,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -295,7 +299,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
@@ -307,7 +311,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
         title: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -318,7 +322,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
                 size: 24,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +334,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
                       color: Colors.grey[800],
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     description,
                     style: TextStyle(
@@ -346,7 +350,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
         value: value,
         onChanged: onChanged,
         controlAffinity: ListTileControlAffinity.trailing,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         activeColor: color,
         checkColor: Colors.white,
       ),
@@ -362,7 +366,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
 class AffirmativeConsentDialog extends StatelessWidget {
   final bool isSender;
   
-  const AffirmativeConsentDialog({Key? key, required this.isSender}) : super(key: key);
+  const AffirmativeConsentDialog({super.key, required this.isSender});
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +377,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
       title: _buildDialogTitle(context),
       content: _buildDialogContent(context),
       actions: _buildDialogActions(context),
-      contentPadding: EdgeInsets.all(24),
+      contentPadding: const EdgeInsets.all(24),
       actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
     );
   }
@@ -389,7 +393,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
               color: Colors.deepPurple,
               size: 32,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 isSender ? 'Request to Share Image' : 'Request to View Image',
@@ -422,7 +426,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
 
   Widget _buildConsentSection(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.purple.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
@@ -440,7 +444,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
               color: Colors.purple[800],
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             isSender
               ? 'You are about to share an intimate image. This requires explicit, enthusiastic agreement from you.'
@@ -457,7 +461,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
 
   Widget _buildRiskAcknowledgementSection(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.red.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
@@ -468,8 +472,8 @@ class AffirmativeConsentDialog extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.warning_outlined, color: Colors.red, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.warning_outlined, color: Colors.red, size: 20),
+              const SizedBox(width: 8),
               Text(
                 'Important Considerations',
                 style: TextStyle(
@@ -479,7 +483,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             '• This is a voluntary action\n'
             '• You have the option to decline',
@@ -500,7 +504,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
         style: TextButton.styleFrom(
           foregroundColor: Colors.grey[800],
         ),
-        child: Text('Decline'),
+        child: const Text('Decline'),
       ),
       ElevatedButton(
         onPressed: () => Navigator.of(context).pop(true),
@@ -520,7 +524,10 @@ class AffirmativeConsentDialog extends StatelessWidget {
 }
 
 class DynamicConsentDialog extends StatefulWidget {
+  const DynamicConsentDialog({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _DynamicConsentDialogState createState() => _DynamicConsentDialogState();
 }
 
@@ -548,7 +555,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Set Consent Re-evaluation Interval'),
+      title: const Text('Set Consent Re-evaluation Interval'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -558,14 +565,14 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
               'How often should consent be re-evaluated?',
               style: TextStyle(color: Colors.grey[700]),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _hoursController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Hours',
                       border: OutlineInputBorder(),
                       helperText: '0-48',
@@ -576,17 +583,17 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
                       if (hours > 48) {
                         _hoursController.text = '48';
                         _hoursController.selection = TextSelection.fromPosition(
-                          TextPosition(offset: 2)
+                          const TextPosition(offset: 2)
                         );
                       }
                     },
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _minutesController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Minutes',
                       border: OutlineInputBorder(),
                       helperText: '0-59',
@@ -597,13 +604,13 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
                       if (minutes > 59) {
                         _minutesController.text = '59';
                         _minutesController.selection = TextSelection.fromPosition(
-                          TextPosition(offset: 2)
+                          const TextPosition(offset: 2)
                         );
                       }
                     },
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _secondsController,
@@ -641,7 +648,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
                     'What this means:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '• You\'ll be asked to review your consent after the set time\n'
                     '• You can choose to continue sharing or revoke access\n'
@@ -660,7 +667,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(null),
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -684,7 +691,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
 // Extension to capitalize first letter
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
 class GranularConsentDialog extends StatefulWidget {
@@ -742,28 +749,28 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
               'Configure detailed permissions:',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             _buildPermissionSection('Content Access'),
             SwitchListTile(
-              title: Text('Allow Saving'),
-              subtitle: Text('Recipient can save the content locally'),
+              title: const Text('Allow Saving'),
+              subtitle: const Text('Recipient can save the content locally'),
               value: settings['allowSaving'],
               onChanged: (value) => setState(() => settings['allowSaving'] = value),
             ),
             
             _buildPermissionSection('Sharing Controls'),
             SwitchListTile(
-              title: Text('Allow Forwarding'),
-              subtitle: Text('Recipient can share the content to other users'),
+              title: const Text('Allow Forwarding'),
+              subtitle: const Text('Recipient can share the content to other users'),
               value: settings['allowForwarding'],
               onChanged: (value) => setState(() => settings['allowForwarding'] = value),
             ),
             
             _buildPermissionSection('Time Restrictions'),
             SwitchListTile(
-              title: Text('Set Time Limit'),
-              subtitle: Text('Content will be automatically deleted after the set time'),
+              title: const Text('Set Time Limit'),
+              subtitle: const Text('Content will be automatically deleted after the set time'),
               value: settings['timeLimit'],
               onChanged: (value) => setState(() => settings['timeLimit'] = value),
             ),
@@ -773,7 +780,7 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Access duration (minutes):'),
+                    const Text('Access duration (minutes):'),
                     Row(
                       children: [
                         Expanded(
@@ -788,7 +795,7 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
                             },
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text('${settings['timeLimitMinutes']}m'),
                       ],
                     ),
@@ -801,7 +808,7 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(), // Just close without calling onSettingsUpdated
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {

@@ -6,9 +6,10 @@ import 'package:consent_visualisation_tool/view/chat_interface_view.dart';
 import '../theme/app_theme.dart';
 
 class CompareScreen extends StatefulWidget {
-  const CompareScreen({Key? key}) : super(key: key);
+  const CompareScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CompareScreenState createState() => _CompareScreenState();
 }
 
@@ -183,7 +184,7 @@ Widget _buildDimensionSelector() {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-        border: Border(
+        border: const Border(
           left: BorderSide(
             color: AppTheme.primaryColor,
             width: 4,
@@ -193,7 +194,7 @@ Widget _buildDimensionSelector() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Dimension Focus',
             style: TextStyle(
               color: AppTheme.primaryColor,
@@ -205,7 +206,7 @@ Widget _buildDimensionSelector() {
           Text(
             dimensions[controller.selectedDimension.value]?['description'] as String? ??
                 'Select a dimension to compare',
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textPrimaryColor,
               fontSize: 15,
               height: 1.5,

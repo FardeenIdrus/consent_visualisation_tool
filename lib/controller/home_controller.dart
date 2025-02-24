@@ -12,7 +12,7 @@ class HomeController {
       case '/compare':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CompareScreen()),
+          MaterialPageRoute(builder: (context) => const CompareScreen()),
         );
         break;
       case '/simulation':
