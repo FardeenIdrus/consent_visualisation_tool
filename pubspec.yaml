@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   image_picker: ^1.0.4
+  flutter_localizations:
+      sdk: flutter
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -46,6 +48,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
   coverage: ^1.6.3
+  mockito: ^5.4.2
+  build_runner: ^2.4.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
