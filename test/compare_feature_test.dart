@@ -64,7 +64,8 @@ void main() {
   // Verify that the initial consent process map for Dynamic Consent is correct.
   test('getInitialConsentProcess returns correct data for Dynamic Consent', () {
     final expectedDynamic = {
-      'main': ['At point of set up:', 'The sender configures how often they want to review consent'],
+      'main': [ 'Before sharing content:',
+      'The sender is provided an option to configure how often they want to review consent'],
       'sub': ['The sender then sets consent review frequency (hourly, daily, weekly)', 'Configure notification preferences for review reminders'],
       'additional': ['The system explains how ongoing consent management works', 'The sender must understand the implications of their chosen review schedule']
     };
