@@ -6,13 +6,12 @@ class ConsentFlowVisualization extends StatefulWidget {
   final List<ConsentStep> steps;
 
   const ConsentFlowVisualization({
-    super.key,
+    Key? key,
     required this.modelName,
     required this.steps,
-  });
+  }) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _ConsentFlowVisualizationState createState() => _ConsentFlowVisualizationState();
 }
 
@@ -25,7 +24,7 @@ class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(bottom: 16.0),
           child: Text(
             widget.modelName,
             style: const TextStyle(
@@ -56,6 +55,30 @@ class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
           },
         ),
       ],
+    );
+  }
+}
+
+class ConnectorLine extends StatelessWidget {
+  const ConnectorLine({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      width: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor.withOpacity(0.3),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.primaryColor.withOpacity(0.5),
+            AppTheme.primaryColor.withOpacity(0.2),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -161,30 +184,6 @@ class StepCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class ConnectorLine extends StatelessWidget {
-  const ConnectorLine({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      width: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.3),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppTheme.primaryColor.withOpacity(0.5),
-            AppTheme.primaryColor.withOpacity(0.2),
-          ],
         ),
       ),
     );

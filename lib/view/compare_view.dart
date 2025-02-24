@@ -80,31 +80,44 @@ class _CompareScreenState extends State<CompareScreen> {
     ];
   }
 
-  List<ConsentStep> _buildStandardSteps(Map<String, dynamic> modelData) {
-    List<ConsentStep> steps = [];
-    if (modelData['main'] != null) {
-      steps.add(ConsentStep(
-        title: 'Primary Features',
-        icon: Icons.check_circle_outline,
-        details: List<String>.from(modelData['main']),
-      ));
-    }
-    if (modelData['sub'] != null && (modelData['sub'] as List).isNotEmpty) {
-      steps.add(ConsentStep(
-        title: 'Capabilities',
-        icon: Icons.settings_outlined,
-        details: List<String>.from(modelData['sub']),
-      ));
-    }
-    if (modelData['additional'] != null) {
-      steps.add(ConsentStep(
-        title: 'Key Considerations',
-        icon: Icons.info_outline,
-        details: List<String>.from(modelData['additional']),
-      ));
-    }
-    return steps;
+List<ConsentStep> _buildStandardSteps(Map<String, dynamic> modelData) {
+  List<ConsentStep> steps = [];
+
+  if (modelData['main'] != null) {
+    steps.add(ConsentStep(
+      title: 'Primary Features',
+      icon: Icons.check_circle_outline,
+      details: List<String>.from(modelData['main']),
+    ));
   }
+
+  // Add handling for risk_disclosure
+  if (modelData['risk_disclosure'] != null) {
+    steps.add(ConsentStep(
+      title: 'Risk Disclosure',
+      icon: Icons.warning_outlined,  // Using warning icon for risks
+      details: List<String>.from(modelData['risk_disclosure']),
+    ));
+  }
+
+  if (modelData['sub'] != null && (modelData['sub'] as List).isNotEmpty) {
+    steps.add(ConsentStep(
+      title: 'Capabilities',
+      icon: Icons.settings_outlined,
+      details: List<String>.from(modelData['sub']),
+    ));
+  }
+
+  if (modelData['additional'] != null) {
+    steps.add(ConsentStep(
+      title: 'Key Implications',
+      icon: Icons.info_outline,
+      details: List<String>.from(modelData['additional']),
+    ));
+  }
+
+  return steps;
+}
 
   // Builds the dimension selector row.
   Widget _buildDimensionSelector() {
@@ -200,36 +213,45 @@ class _CompareScreenState extends State<CompareScreen> {
   }
 
   // Builds the main comparison section.
-  Widget _buildComparison(List<ConsentModel> models) {
-    return Column(
-      children: [
-        _buildDimensionDescription(),
-        Expanded(
+Widget _buildComparison(List<ConsentModel> models) {
+  return Column(
+    children: [
+      _buildDimensionDescription(),
+      const SizedBox(height: 8),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: ConsentFlowVisualization(
-                  modelName: models[0].name,
-                  steps: _getStepsForModel(models[0]),
+                child: SingleChildScrollView( // Wrap in SingleChildScrollView
+                  child: ConsentFlowVisualization(
+                    modelName: models[0].name,
+                    steps: _getStepsForModel(models[0]),
+                  ),
                 ),
               ),
               Container(
                 width: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+                margin: const EdgeInsets.symmetric(horizontal: 24),
                 color: Colors.grey[300],
               ),
               Expanded(
-                child: ConsentFlowVisualization(
-                  modelName: models[1].name,
-                  steps: _getStepsForModel(models[1]),
+                child: SingleChildScrollView( // Wrap in SingleChildScrollView
+                  child: ConsentFlowVisualization(
+                    modelName: models[1].name,
+                    steps: _getStepsForModel(models[1]),
+                  ),
                 ),
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -260,6 +282,7 @@ class _CompareScreenState extends State<CompareScreen> {
                       ),
                     ),
                   )
+                  
                 : const SizedBox.shrink();
           },
         ),

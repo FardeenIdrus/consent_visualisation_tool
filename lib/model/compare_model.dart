@@ -10,23 +10,26 @@ class CompareScreenModel {
   // Returns a map describing the initial consent process for a given model.
   Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
     switch (model.name) {
-      case 'Informed Consent':
-        return {
-          'main': <String>[
-            'The sender is presented with a risk disclosure panel highlighting five key areas:',
-          ],
-           'risk_disclosure': <String>[
+case 'Informed Consent':
+  return {
+    'main': <String>[
+      'Before sharing content:',
+      'The sender is presented with a comprehensive risk disclosure panel',
+      'The sender must actively acknowledge understanding of risks'
+    ],
+    'risk_disclosure': <String>[
+      'The risk disclosure panel includes the following risks:',
       'Digital Permanence: Once shared, images can persist indefinitely in digital spaces, creating potential for future misuse.',
       'Distribution Risks: Once shared, images can be copied, saved, or redistributed without your discretion, even if initially shared within a consensual exchange.',
       'Control Limitations: After sharing, you will have limited ability to control how your images are stored, shared, or used by others.',
       'Future Impact: Shared images may have long-term consequences for personal relationships, professional opportunities, and overall wellbeing.',
-      'Security Risks:  There is potential for third-party interception, unauthorized access, or data breaches of shared images.'
+      'Security Risks: There is potential for third-party interception, unauthorized access, or data breaches of shared images.'
     ],
-          'additional': <String>[
-            'User must check acknowledgment boxes for each risk',
-            'User cannot proceed without acknowledging all risks'
-          ]
-        };
+    'additional': <String>[
+      'Each risk requires explicit acknowledgment',
+      'Sharing disabled until all risks are understood'
+    ]
+  };
 case 'Affirmative Consent':
   return {
     'type': 'pathways',
@@ -34,12 +37,12 @@ case 'Affirmative Consent':
       'title': 'Sender-Initiated Sharing',
       'steps': <String>[
         'The sender is presented with the same risk disclosure as Informed Consent when they attempt to share an image',
-        'User must check acknowledgment boxes for each risk',
-        'User cannot proceed without acknowledging all risks',
-        'Sender is prompted: "Do you enthusiastically agree to share this image?"',
+        'The sender must check acknowledgment boxes for each risk',
+        'The sender cannot proceed without acknowledging all risks',
+        'The sender is prompted: "Do you enthusiastically agree to share this image?"',
         'Sender must explicitly confirm their willing participation',
         'Recipient must actively confirm their willingness to receive',
-        'Clear decline option is provided at each step'
+        'Clear decline option is provided at each step for both sender and recipient'
       ]
     },
     'pathway2': {
@@ -51,7 +54,7 @@ case 'Affirmative Consent':
         'Sender must check acknowledgment boxes for each risk',
         'Sender is prompted: "Do you enthusiastically agree to share this image?"',
         'Only if the sender agrees, will the recipient receive the image',
-        'Clear decline option is provided at each step'
+        'Clear decline option is provided at each step to the sender'
       ]
     }
   };
@@ -62,28 +65,28 @@ case 'Dynamic Consent':
       'The sender configures how often they want to review consent'
     ],
     'sub': <String>[
-      'Set consent review frequency (hourly, daily, weekly)',
+      'The sender then sets consent review frequency (hourly, daily, weekly)',
       'Configure notification preferences for review reminders',
     ],
     'additional': <String>[
-      'System explains how ongoing consent management works',
-      'Sender must understand the implications of their chosen review schedule'
+      'The system explains how ongoing consent management works',
+      'The sender must understand the implications of their chosen review schedule'
     ]
   };
 case 'Granular Consent':
   return {
     'main': <String>[
+      'At point of set up:',
       'The sender is presented with a list of permissions settings',
       'The sender must configure detailed permission settings',
     ],
     'sub': <String>[
-      'Time limits for content access',
-      'Recipients permission levels',
-      'Sharing restriction preferences',
-      'Screenshot permissions',
+      'Define content viewing duration',
+      'Configure saving restrictions',
+      'Configure sharing restrictions',
     ],
     'additional': <String>[
-      'Sender is shown explanation for each permission setting',
+      'Each permission setting requires explicit configuration',
       'All settings must be configured before sharing'
     ]
   };
@@ -91,14 +94,14 @@ case 'Implied Consent':
   return {
     'main': <String>[
       'At point of set up:',
-      'No explicit consent mechanism',
+      'No explicit consent mechanism is presented to the sender',
       'Consent is assumed through user actions'
     ],
     'sub': <String>[
-      'No risk disclosure provided',
+      'No risk disclosure information is provided to the sender',
       'No explicit confirmation required',
-      'No consent configuration needed',
-      'Standard sharing interface only'
+      'No consent configuration options are presented to the sender',
+      
     ],
     'additional': <String>[
       'Relies purely on assumption of consent through behavior',
@@ -116,13 +119,13 @@ case 'Informed Consent':
   return {
     'main': <String>[
       'At the point of sharing:',
-      'Sharing is permitted once sender acknowledges all risks',
+      'The sender is only allowed to share once they acknowledge all risks',
       'No technical controls are available to the sender to protect their content'
     ],
     'sub': <String>[
-      'Cannot set time limits for content access',
-      'Cannot prevent recipients from saving content',
-      'Cannot restrict recipients from sharing content',
+      'The sender cannot set time limits for content access',
+      'The sender cannot prevent recipients from saving content',
+      'The sender cannot restrict recipients from sharing content'
     ],
     'additional': <String>[
       'Protection relies on senders understanding of the risks'
@@ -148,12 +151,12 @@ case 'Dynamic Consent':
   return {
     'main': <String>[
       'At the point of sharing:',
-      'Sharing occurs with configured review schedule',
-      'No immediate technical restrictions available'
+       'The sender shares content with a configured review schedule',
+        'The sender has no immediate technical restrictions'
     ],
     'sub': <String>[
-      'Cannot prevent recipients from saving content',
-      'Cannot restrict recipients from sharing content'
+            'The sender cannot prevent recipients from saving content',
+            'The sender cannot restrict recipients from sharing content'
     ],
     'additional': <String>[
       'Protection relies on ongoing review of consent rather than technical restrictions'
@@ -163,30 +166,29 @@ case 'Dynamic Consent':
   return {
     'main': <String>[
       'At the point of sharing:',
-      'Technical controls enforce configured permission settings',
+      'System enforces configured permission settings',
       'Protection mechanisms are applied to content'
     ],
     'sub': <String>[
       'Time limits are set on content access',
       'Saving permissions are enforced',
       'Sharing restrictions are implemented',
-      'Screenshot permissions are applied',
     ],
     'additional': <String>[
-      'All configured protection mechanisms are automatically applied'
+      'All configured protection mechanisms are applied'
     ]
   };
 case 'Implied Consent':
   return {
     'main': <String>[
       'At the point of sharing:',
-      'No consent verification required',
-      'No technical controls available'
+      'No consent verification is presented to the sender',
+      'No technical controls are available to the sender'
     ],
     'sub': <String>[
-      'Cannot set time limits for content access',
-      'Cannot prevent recipients from saving content',
-      'Cannot restrict recipients from sharing content'
+      'The sender cannot set time limits for content access',
+      'The sender cannot prevent recipients from saving content',
+      'The sender cannot restrict recipients from sharing content'
     ],
     'additional': <String>[
       'No protection mechanisms are available'
@@ -203,8 +205,8 @@ case 'Informed Consent':
   return {
     'main': <String>[
       'After sharing:',
-      'No ability to modify initial sharing conditions',
-      'No way to control shared content'
+      'The sender has no ability to modify initial sharing conditions',
+      'The sender has no way to control shared content'
     ],
     'sub': <String>[
       'The sender has no ability to withdraw shared content',
@@ -228,7 +230,7 @@ case 'Informed Consent':
       'The sender has no ability to track how content is being used'
     ],
     'additional': <String>[
-      'Once content is shared, sender loses technical control despite initial mutual agreement'
+      'Once content is shared, sender loses technical control over shared content'
     ]
   };
 case 'Dynamic Consent':
@@ -239,25 +241,25 @@ case 'Dynamic Consent':
       'Sender maintains ongoing control through review process'
     ],
     'sub': <String>[
+      'Can delete shared content at any time',
       'Can revoke access during any review',
       'Can modify review frequency',
-      'Can delete shared content at any time',
       'Receives notifications for scheduled reviews'
     ],
     'additional': <String>[
-      'Continuous control through scheduled reassessment',
+      'The sender has ontinuous control through scheduled reassessment and the ability to revoke access to shared content at any time',
     ]
   };
    case 'Granular Consent':
   return {
     'main': <String>[
       'After sharing:',
-      'The sender can modify sharing conditions',
-      'The sender retains control through technical restrictions'
+      'The sender retains ability to modify controls',
+      'Technical restrictions remain enforceable'
     ],
     'sub': <String>[
-      'Can adjust time limits',
-      'Can modify access permissions',
+      'Can adjust viewing time limits',
+      'Can modify saving permissions',
       'Can update sharing restrictions',
     ],
     'additional': <String>[
@@ -268,8 +270,8 @@ case 'Implied Consent':
   return {
     'main': <String>[
       'After sharing:',
-      'No ability to modify conditions',
-      'No control over shared content'
+      'The sender has no ability to modify conditions',
+      'The sender has no control over shared content'
     ],
     'sub': <String>[
       'Cannot withdraw shared content',
