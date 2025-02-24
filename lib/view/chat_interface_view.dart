@@ -158,6 +158,7 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
               children: [
                 _buildChatView(isSender: true),
                 _buildChatView(isSender: false),
+                 _buildChatView(isSender: false, isRecipient2: true),
               ],
             ),
           ),
@@ -185,6 +186,7 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
             children: [
               _buildTabButton('Sender', 0),
               _buildTabButton('Recipient', 1),
+               _buildTabButton('Recipient 2', 2),
             ],
           ),
         ),
@@ -282,18 +284,18 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
   }
 
 // Fix for the Affirmative Consent dialog issue
-Widget _buildChatView({required bool isSender}) {
+Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
   return Column(
     children: [
       Expanded(
         child: StreamBuilder<List<SimulationMessage>>(
           stream: _model.messageStream,
-          initialData: _model.messages,
+          initialData: isRecipient2 ? _model.forwardedMessages : _model.messages,
           builder: (context, snapshot) {
-            final messages = snapshot.data ?? [];
+            final messages = isRecipient2 ? _model.forwardedMessages : snapshot.data ?? [];
             
-            // Handle image request message only once per message
-            if (isSender) {
+            // Handle image request message only once per message (only for sender view)
+            if (isSender && !isRecipient2) {
               final imageRequestMessage = messages.firstWhereOrNull(
                 (message) => message.additionalData?['imageRequest'] == true && 
                            !message.additionalData?['processed'] == true
@@ -325,17 +327,17 @@ Widget _buildChatView({required bool isSender}) {
                             _model.deleteMessage(imageRequestMessage);
                             await _pickImage();
                             if (_pendingImageBytes != null) {
-                              await _handleSendMessage('', recipientRequested: true); // Add the flag here
+                              await _handleSendMessage('', recipientRequested: true);
                             }
                           },
                           child: Text('Share Image'),
                         ),
-                                              ],
-                                            ),
-                                          );
-                                        });
-                                      }
-                                    }
+                      ],
+                    ),
+                  );
+                });
+              }
+            }
 
             return ListView.builder(
               padding: EdgeInsets.symmetric(vertical: 16),
@@ -346,10 +348,11 @@ Widget _buildChatView({required bool isSender}) {
                 if (message.additionalData?['imageRequest'] == true) {
                   return Container();
                 }
+                
                 return MessageBubble(
-  message: message,
-  isReceiver: !isSender,
-  controller: _controller,
+                  message: message,
+                  isReceiver: !isSender,
+                  controller: _controller,
                   onConsentRequest: () async {
                     final consentGranted = await showDialog<bool>(
                       context: context,
@@ -363,27 +366,41 @@ Widget _buildChatView({required bool isSender}) {
                       });
                     }
                   },
-      canSave: message.additionalData?['allowSaving'] ?? true,
-  canForward: message.additionalData?['allowForwarding'] ?? true,
-  onSave: (context) {
-    _showActionAnimation(context, 'save');
-  },
-  onForward: (context) {
-    _showActionAnimation(context, 'forward');
-  },
-  onDelete: message.consentModel?.name == 'Dynamic Consent' 
-    ? (context) => _controller.deleteMessage(message)
-    : null,
-);
-
+                  canSave: message.additionalData?['allowSaving'] ?? true,
+                  canForward: message.additionalData?['allowForwarding'] ?? true,
+                  onSave: (context) {
+                    _showActionAnimation(context, 'save');
+                  },
+                  onForward: (context) {
+                    // Create a new message for Recipient 2
+                    final forwardedMessage = SimulationMessage(
+                      content: message.content,
+                      type: message.type,
+                      imageData: message.imageData,
+                      consentModel: message.consentModel,
+                      additionalData: message.additionalData != null 
+                          ? Map<String, dynamic>.from(message.additionalData!) 
+                          : null,
+                    );
+                    
+                    // Add the forwarded message to Recipient 2's list
+                    _model.addForwardedMessage(forwardedMessage);
+                    
+                    // Show forwarding animation
+                    _showActionAnimation(context, 'forward');
+                  },
+                  onDelete: message.consentModel?.name == 'Dynamic Consent' 
+                    ? (context) => _controller.deleteMessage(message)
+                    : null,
+                );
               },
             );
           },
         ),
       ),
       
-      // Image request button for recipient
-      if (!isSender && _model.currentModel?.name == 'Affirmative Consent')
+      // Image request button for recipient (not for sender or recipient 2)
+      if (!isSender && !isRecipient2 && _model.currentModel?.name == 'Affirmative Consent')
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton.icon(
@@ -402,6 +419,28 @@ Widget _buildChatView({required bool isSender}) {
             },
             style: ElevatedButton.styleFrom(
               minimumSize: Size(double.infinity, 50),
+            ),
+          ),
+        ),
+      
+      // Recipient 2 label to show it's forwarded content
+      if (isRecipient2 && _model.forwardedMessages.isEmpty)
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.forward_to_inbox, size: 48, color: Colors.grey[400]),
+                SizedBox(height: 16),
+                Text(
+                  'Forwarded messages will appear here',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
           ),
         ),

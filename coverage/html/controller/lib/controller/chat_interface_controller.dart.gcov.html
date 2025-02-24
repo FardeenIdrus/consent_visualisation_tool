@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntryLo">0.3&nbsp;%</td>
-            <td class="headerCovTableEntry">380</td>
+            <td class="headerCovTableEntry">381</td>
             <td class="headerCovTableEntry">1</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2025-02-24 18:06:46</td>
+            <td class="headerValue">2025-02-24 18:48:31</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">-</td>
@@ -767,131 +767,132 @@
 <span id="L705"><span class="lineNum">     705</span>              : </span>
 <span id="L706"><span class="lineNum">     706</span>              : class _GranularConsentDialogState extends State&lt;GranularConsentDialog&gt; {</span>
 <span id="L707"><span class="lineNum">     707</span>              :   late Map&lt;String, dynamic&gt; settings;</span>
-<span id="L708"><span class="lineNum">     708</span>              : </span>
-<span id="L709"><span class="lineNum">     709</span> <span class="tlaUNC">           0 :   @override</span></span>
-<span id="L710"><span class="lineNum">     710</span>              :   void initState() {</span>
-<span id="L711"><span class="lineNum">     711</span> <span class="tlaUNC">           0 :     super.initState();</span></span>
-<span id="L712"><span class="lineNum">     712</span> <span class="tlaUNC">           0 :     settings = widget.initialSettings?.cast&lt;String, dynamic&gt;() ?? {</span></span>
-<span id="L713"><span class="lineNum">     713</span>              :       'allowSaving': false,</span>
-<span id="L714"><span class="lineNum">     714</span>              :       'allowForwarding': false,</span>
-<span id="L715"><span class="lineNum">     715</span>              :       'timeLimit': false,</span>
-<span id="L716"><span class="lineNum">     716</span>              :       'timeLimitMinutes': 60,</span>
-<span id="L717"><span class="lineNum">     717</span>              :       'allowScreenshots': false,</span>
-<span id="L718"><span class="lineNum">     718</span>              :       'viewingDuration': false,</span>
-<span id="L719"><span class="lineNum">     719</span>              :       'viewingDurationMinutes': 5,</span>
-<span id="L720"><span class="lineNum">     720</span>              :     };</span>
-<span id="L721"><span class="lineNum">     721</span>              :   }</span>
-<span id="L722"><span class="lineNum">     722</span>              : </span>
-<span id="L723"><span class="lineNum">     723</span> <span class="tlaUNC">           0 :   @override</span></span>
-<span id="L724"><span class="lineNum">     724</span>              : Widget build(BuildContext context) {</span>
-<span id="L725"><span class="lineNum">     725</span> <span class="tlaUNC">           0 :     return AlertDialog(</span></span>
-<span id="L726"><span class="lineNum">     726</span> <span class="tlaUNC">           0 :       title: Text(widget.isModification </span></span>
-<span id="L727"><span class="lineNum">     727</span>              :         ? 'Modify Sharing Permissions' </span>
-<span id="L728"><span class="lineNum">     728</span>              :         : 'Set Sharing Permissions'),</span>
-<span id="L729"><span class="lineNum">     729</span> <span class="tlaUNC">           0 :       content: SingleChildScrollView(</span></span>
-<span id="L730"><span class="lineNum">     730</span> <span class="tlaUNC">           0 :         child: Column(</span></span>
-<span id="L731"><span class="lineNum">     731</span>              :           mainAxisSize: MainAxisSize.min,</span>
-<span id="L732"><span class="lineNum">     732</span>              :           crossAxisAlignment: CrossAxisAlignment.start,</span>
-<span id="L733"><span class="lineNum">     733</span> <span class="tlaUNC">           0 :           children: [</span></span>
-<span id="L734"><span class="lineNum">     734</span> <span class="tlaUNC">           0 :             Text(</span></span>
-<span id="L735"><span class="lineNum">     735</span>              :               'Configure detailed permissions:',</span>
-<span id="L736"><span class="lineNum">     736</span> <span class="tlaUNC">           0 :               style: Theme.of(context).textTheme.bodyLarge,</span></span>
-<span id="L737"><span class="lineNum">     737</span>              :             ),</span>
-<span id="L738"><span class="lineNum">     738</span> <span class="tlaUNC">           0 :             SizedBox(height: 16),</span></span>
-<span id="L739"><span class="lineNum">     739</span>              :             </span>
-<span id="L740"><span class="lineNum">     740</span> <span class="tlaUNC">           0 :             _buildPermissionSection('Content Access'),</span></span>
-<span id="L741"><span class="lineNum">     741</span> <span class="tlaUNC">           0 :             SwitchListTile(</span></span>
-<span id="L742"><span class="lineNum">     742</span> <span class="tlaUNC">           0 :               title: Text('Allow Saving'),</span></span>
-<span id="L743"><span class="lineNum">     743</span> <span class="tlaUNC">           0 :               subtitle: Text('Recipient can save the content locally'),</span></span>
-<span id="L744"><span class="lineNum">     744</span> <span class="tlaUNC">           0 :               value: settings['allowSaving'],</span></span>
-<span id="L745"><span class="lineNum">     745</span> <span class="tlaUNC">           0 :               onChanged: (value) =&gt; setState(() =&gt; settings['allowSaving'] = value),</span></span>
-<span id="L746"><span class="lineNum">     746</span>              :             ),</span>
-<span id="L747"><span class="lineNum">     747</span>              :             </span>
-<span id="L748"><span class="lineNum">     748</span> <span class="tlaUNC">           0 :             _buildPermissionSection('Sharing Controls'),</span></span>
-<span id="L749"><span class="lineNum">     749</span> <span class="tlaUNC">           0 :             SwitchListTile(</span></span>
-<span id="L750"><span class="lineNum">     750</span> <span class="tlaUNC">           0 :               title: Text('Allow Forwarding'),</span></span>
-<span id="L751"><span class="lineNum">     751</span> <span class="tlaUNC">           0 :               subtitle: Text('Recipient can share the content to other users'),</span></span>
-<span id="L752"><span class="lineNum">     752</span> <span class="tlaUNC">           0 :               value: settings['allowForwarding'],</span></span>
-<span id="L753"><span class="lineNum">     753</span> <span class="tlaUNC">           0 :               onChanged: (value) =&gt; setState(() =&gt; settings['allowForwarding'] = value),</span></span>
-<span id="L754"><span class="lineNum">     754</span>              :             ),</span>
-<span id="L755"><span class="lineNum">     755</span>              :             </span>
-<span id="L756"><span class="lineNum">     756</span> <span class="tlaUNC">           0 :             _buildPermissionSection('Time Restrictions'),</span></span>
-<span id="L757"><span class="lineNum">     757</span> <span class="tlaUNC">           0 :             SwitchListTile(</span></span>
-<span id="L758"><span class="lineNum">     758</span> <span class="tlaUNC">           0 :               title: Text('Set Time Limit'),</span></span>
-<span id="L759"><span class="lineNum">     759</span> <span class="tlaUNC">           0 :               subtitle: Text('Content will be automatically deleted after the set time'),</span></span>
-<span id="L760"><span class="lineNum">     760</span> <span class="tlaUNC">           0 :               value: settings['timeLimit'],</span></span>
-<span id="L761"><span class="lineNum">     761</span> <span class="tlaUNC">           0 :               onChanged: (value) =&gt; setState(() =&gt; settings['timeLimit'] = value),</span></span>
-<span id="L762"><span class="lineNum">     762</span>              :             ),</span>
-<span id="L763"><span class="lineNum">     763</span> <span class="tlaUNC">           0 :             if (settings['timeLimit'])</span></span>
-<span id="L764"><span class="lineNum">     764</span> <span class="tlaUNC">           0 :               Padding(</span></span>
-<span id="L765"><span class="lineNum">     765</span>              :                 padding: const EdgeInsets.symmetric(horizontal: 16),</span>
-<span id="L766"><span class="lineNum">     766</span> <span class="tlaUNC">           0 :                 child: Column(</span></span>
-<span id="L767"><span class="lineNum">     767</span>              :                   crossAxisAlignment: CrossAxisAlignment.start,</span>
-<span id="L768"><span class="lineNum">     768</span> <span class="tlaUNC">           0 :                   children: [</span></span>
-<span id="L769"><span class="lineNum">     769</span> <span class="tlaUNC">           0 :                     Text('Access duration (minutes):'),</span></span>
-<span id="L770"><span class="lineNum">     770</span> <span class="tlaUNC">           0 :                     Row(</span></span>
-<span id="L771"><span class="lineNum">     771</span> <span class="tlaUNC">           0 :                       children: [</span></span>
-<span id="L772"><span class="lineNum">     772</span> <span class="tlaUNC">           0 :                         Expanded(</span></span>
-<span id="L773"><span class="lineNum">     773</span> <span class="tlaUNC">           0 :                           child: Slider(</span></span>
-<span id="L774"><span class="lineNum">     774</span> <span class="tlaUNC">           0 :                             value: settings['timeLimitMinutes'].toDouble(),</span></span>
-<span id="L775"><span class="lineNum">     775</span>              :                             min: 1,</span>
-<span id="L776"><span class="lineNum">     776</span>              :                             max: 180,</span>
-<span id="L777"><span class="lineNum">     777</span>              :                             divisions: 179,</span>
-<span id="L778"><span class="lineNum">     778</span> <span class="tlaUNC">           0 :                             label: '${settings['timeLimitMinutes']} min',</span></span>
-<span id="L779"><span class="lineNum">     779</span> <span class="tlaUNC">           0 :                             onChanged: (value) {</span></span>
-<span id="L780"><span class="lineNum">     780</span> <span class="tlaUNC">           0 :                               setState(() =&gt; settings['timeLimitMinutes'] = value.round());</span></span>
-<span id="L781"><span class="lineNum">     781</span>              :                             },</span>
-<span id="L782"><span class="lineNum">     782</span>              :                           ),</span>
-<span id="L783"><span class="lineNum">     783</span>              :                         ),</span>
-<span id="L784"><span class="lineNum">     784</span> <span class="tlaUNC">           0 :                         SizedBox(width: 8),</span></span>
-<span id="L785"><span class="lineNum">     785</span> <span class="tlaUNC">           0 :                         Text('${settings['timeLimitMinutes']}m'),</span></span>
-<span id="L786"><span class="lineNum">     786</span>              :                       ],</span>
-<span id="L787"><span class="lineNum">     787</span>              :                     ),</span>
-<span id="L788"><span class="lineNum">     788</span>              :                   ],</span>
-<span id="L789"><span class="lineNum">     789</span>              :                 ),</span>
-<span id="L790"><span class="lineNum">     790</span>              :               ),</span>
-<span id="L791"><span class="lineNum">     791</span>              :           ],</span>
-<span id="L792"><span class="lineNum">     792</span>              :         ),</span>
-<span id="L793"><span class="lineNum">     793</span>              :       ),</span>
-<span id="L794"><span class="lineNum">     794</span> <span class="tlaUNC">           0 :       actions: [</span></span>
-<span id="L795"><span class="lineNum">     795</span> <span class="tlaUNC">           0 :         TextButton(</span></span>
-<span id="L796"><span class="lineNum">     796</span> <span class="tlaUNC">           0 :           onPressed: () =&gt; Navigator.of(context).pop(null),</span></span>
-<span id="L797"><span class="lineNum">     797</span> <span class="tlaUNC">           0 :           child: Text('Cancel'),</span></span>
+<span id="L708"><span class="lineNum">     708</span>              :   late Map&lt;String, dynamic&gt; originalSettings;</span>
+<span id="L709"><span class="lineNum">     709</span>              : </span>
+<span id="L710"><span class="lineNum">     710</span> <span class="tlaUNC">           0 :   @override</span></span>
+<span id="L711"><span class="lineNum">     711</span>              :   void initState() {</span>
+<span id="L712"><span class="lineNum">     712</span> <span class="tlaUNC">           0 :     super.initState();</span></span>
+<span id="L713"><span class="lineNum">     713</span>              :     // Store the original settings</span>
+<span id="L714"><span class="lineNum">     714</span> <span class="tlaUNC">           0 :     originalSettings = widget.initialSettings?.cast&lt;String, dynamic&gt;() ?? {</span></span>
+<span id="L715"><span class="lineNum">     715</span>              :       'allowSaving': false,</span>
+<span id="L716"><span class="lineNum">     716</span>              :       'allowForwarding': false,</span>
+<span id="L717"><span class="lineNum">     717</span>              :       'timeLimit': false,</span>
+<span id="L718"><span class="lineNum">     718</span>              :       'timeLimitMinutes': 60,</span>
+<span id="L719"><span class="lineNum">     719</span>              :       'allowScreenshots': false,</span>
+<span id="L720"><span class="lineNum">     720</span>              :       'addWatermark': false,</span>
+<span id="L721"><span class="lineNum">     721</span>              :       'viewingDuration': false,</span>
+<span id="L722"><span class="lineNum">     722</span>              :       'viewingDurationMinutes': 5,</span>
+<span id="L723"><span class="lineNum">     723</span>              :     };</span>
+<span id="L724"><span class="lineNum">     724</span>              :     </span>
+<span id="L725"><span class="lineNum">     725</span>              :     // Create a deep copy of the settings for editing</span>
+<span id="L726"><span class="lineNum">     726</span> <span class="tlaUNC">           0 :     settings = Map&lt;String, dynamic&gt;.from(originalSettings);</span></span>
+<span id="L727"><span class="lineNum">     727</span>              :   }</span>
+<span id="L728"><span class="lineNum">     728</span>              : </span>
+<span id="L729"><span class="lineNum">     729</span> <span class="tlaUNC">           0 :   @override</span></span>
+<span id="L730"><span class="lineNum">     730</span>              :   Widget build(BuildContext context) {</span>
+<span id="L731"><span class="lineNum">     731</span> <span class="tlaUNC">           0 :     return AlertDialog(</span></span>
+<span id="L732"><span class="lineNum">     732</span> <span class="tlaUNC">           0 :       title: Text(widget.isModification </span></span>
+<span id="L733"><span class="lineNum">     733</span>              :         ? 'Modify Sharing Permissions' </span>
+<span id="L734"><span class="lineNum">     734</span>              :         : 'Set Sharing Permissions'),</span>
+<span id="L735"><span class="lineNum">     735</span> <span class="tlaUNC">           0 :       content: SingleChildScrollView(</span></span>
+<span id="L736"><span class="lineNum">     736</span> <span class="tlaUNC">           0 :         child: Column(</span></span>
+<span id="L737"><span class="lineNum">     737</span>              :           mainAxisSize: MainAxisSize.min,</span>
+<span id="L738"><span class="lineNum">     738</span>              :           crossAxisAlignment: CrossAxisAlignment.start,</span>
+<span id="L739"><span class="lineNum">     739</span> <span class="tlaUNC">           0 :           children: [</span></span>
+<span id="L740"><span class="lineNum">     740</span> <span class="tlaUNC">           0 :             Text(</span></span>
+<span id="L741"><span class="lineNum">     741</span>              :               'Configure detailed permissions:',</span>
+<span id="L742"><span class="lineNum">     742</span> <span class="tlaUNC">           0 :               style: Theme.of(context).textTheme.bodyLarge,</span></span>
+<span id="L743"><span class="lineNum">     743</span>              :             ),</span>
+<span id="L744"><span class="lineNum">     744</span> <span class="tlaUNC">           0 :             SizedBox(height: 16),</span></span>
+<span id="L745"><span class="lineNum">     745</span>              :             </span>
+<span id="L746"><span class="lineNum">     746</span> <span class="tlaUNC">           0 :             _buildPermissionSection('Content Access'),</span></span>
+<span id="L747"><span class="lineNum">     747</span> <span class="tlaUNC">           0 :             SwitchListTile(</span></span>
+<span id="L748"><span class="lineNum">     748</span> <span class="tlaUNC">           0 :               title: Text('Allow Saving'),</span></span>
+<span id="L749"><span class="lineNum">     749</span> <span class="tlaUNC">           0 :               subtitle: Text('Recipient can save the content locally'),</span></span>
+<span id="L750"><span class="lineNum">     750</span> <span class="tlaUNC">           0 :               value: settings['allowSaving'],</span></span>
+<span id="L751"><span class="lineNum">     751</span> <span class="tlaUNC">           0 :               onChanged: (value) =&gt; setState(() =&gt; settings['allowSaving'] = value),</span></span>
+<span id="L752"><span class="lineNum">     752</span>              :             ),</span>
+<span id="L753"><span class="lineNum">     753</span>              :             </span>
+<span id="L754"><span class="lineNum">     754</span> <span class="tlaUNC">           0 :             _buildPermissionSection('Sharing Controls'),</span></span>
+<span id="L755"><span class="lineNum">     755</span> <span class="tlaUNC">           0 :             SwitchListTile(</span></span>
+<span id="L756"><span class="lineNum">     756</span> <span class="tlaUNC">           0 :               title: Text('Allow Forwarding'),</span></span>
+<span id="L757"><span class="lineNum">     757</span> <span class="tlaUNC">           0 :               subtitle: Text('Recipient can share the content to other users'),</span></span>
+<span id="L758"><span class="lineNum">     758</span> <span class="tlaUNC">           0 :               value: settings['allowForwarding'],</span></span>
+<span id="L759"><span class="lineNum">     759</span> <span class="tlaUNC">           0 :               onChanged: (value) =&gt; setState(() =&gt; settings['allowForwarding'] = value),</span></span>
+<span id="L760"><span class="lineNum">     760</span>              :             ),</span>
+<span id="L761"><span class="lineNum">     761</span>              :             </span>
+<span id="L762"><span class="lineNum">     762</span> <span class="tlaUNC">           0 :             _buildPermissionSection('Time Restrictions'),</span></span>
+<span id="L763"><span class="lineNum">     763</span> <span class="tlaUNC">           0 :             SwitchListTile(</span></span>
+<span id="L764"><span class="lineNum">     764</span> <span class="tlaUNC">           0 :               title: Text('Set Time Limit'),</span></span>
+<span id="L765"><span class="lineNum">     765</span> <span class="tlaUNC">           0 :               subtitle: Text('Content will be automatically deleted after the set time'),</span></span>
+<span id="L766"><span class="lineNum">     766</span> <span class="tlaUNC">           0 :               value: settings['timeLimit'],</span></span>
+<span id="L767"><span class="lineNum">     767</span> <span class="tlaUNC">           0 :               onChanged: (value) =&gt; setState(() =&gt; settings['timeLimit'] = value),</span></span>
+<span id="L768"><span class="lineNum">     768</span>              :             ),</span>
+<span id="L769"><span class="lineNum">     769</span> <span class="tlaUNC">           0 :             if (settings['timeLimit'])</span></span>
+<span id="L770"><span class="lineNum">     770</span> <span class="tlaUNC">           0 :               Padding(</span></span>
+<span id="L771"><span class="lineNum">     771</span>              :                 padding: const EdgeInsets.symmetric(horizontal: 16),</span>
+<span id="L772"><span class="lineNum">     772</span> <span class="tlaUNC">           0 :                 child: Column(</span></span>
+<span id="L773"><span class="lineNum">     773</span>              :                   crossAxisAlignment: CrossAxisAlignment.start,</span>
+<span id="L774"><span class="lineNum">     774</span> <span class="tlaUNC">           0 :                   children: [</span></span>
+<span id="L775"><span class="lineNum">     775</span> <span class="tlaUNC">           0 :                     Text('Access duration (minutes):'),</span></span>
+<span id="L776"><span class="lineNum">     776</span> <span class="tlaUNC">           0 :                     Row(</span></span>
+<span id="L777"><span class="lineNum">     777</span> <span class="tlaUNC">           0 :                       children: [</span></span>
+<span id="L778"><span class="lineNum">     778</span> <span class="tlaUNC">           0 :                         Expanded(</span></span>
+<span id="L779"><span class="lineNum">     779</span> <span class="tlaUNC">           0 :                           child: Slider(</span></span>
+<span id="L780"><span class="lineNum">     780</span> <span class="tlaUNC">           0 :                             value: settings['timeLimitMinutes'].toDouble(),</span></span>
+<span id="L781"><span class="lineNum">     781</span>              :                             min: 1,</span>
+<span id="L782"><span class="lineNum">     782</span>              :                             max: 180,</span>
+<span id="L783"><span class="lineNum">     783</span>              :                             divisions: 179,</span>
+<span id="L784"><span class="lineNum">     784</span> <span class="tlaUNC">           0 :                             label: '${settings['timeLimitMinutes']} min',</span></span>
+<span id="L785"><span class="lineNum">     785</span> <span class="tlaUNC">           0 :                             onChanged: (value) {</span></span>
+<span id="L786"><span class="lineNum">     786</span> <span class="tlaUNC">           0 :                               setState(() =&gt; settings['timeLimitMinutes'] = value.round());</span></span>
+<span id="L787"><span class="lineNum">     787</span>              :                             },</span>
+<span id="L788"><span class="lineNum">     788</span>              :                           ),</span>
+<span id="L789"><span class="lineNum">     789</span>              :                         ),</span>
+<span id="L790"><span class="lineNum">     790</span> <span class="tlaUNC">           0 :                         SizedBox(width: 8),</span></span>
+<span id="L791"><span class="lineNum">     791</span> <span class="tlaUNC">           0 :                         Text('${settings['timeLimitMinutes']}m'),</span></span>
+<span id="L792"><span class="lineNum">     792</span>              :                       ],</span>
+<span id="L793"><span class="lineNum">     793</span>              :                     ),</span>
+<span id="L794"><span class="lineNum">     794</span>              :                   ],</span>
+<span id="L795"><span class="lineNum">     795</span>              :                 ),</span>
+<span id="L796"><span class="lineNum">     796</span>              :               ),</span>
+<span id="L797"><span class="lineNum">     797</span>              :           ],</span>
 <span id="L798"><span class="lineNum">     798</span>              :         ),</span>
-<span id="L799"><span class="lineNum">     799</span> <span class="tlaUNC">           0 :         ElevatedButton(</span></span>
-<span id="L800"><span class="lineNum">     800</span> <span class="tlaUNC">           0 :           onPressed: () {</span></span>
-<span id="L801"><span class="lineNum">     801</span> <span class="tlaUNC">           0 :             if (widget.isModification) {</span></span>
-<span id="L802"><span class="lineNum">     802</span> <span class="tlaUNC">           0 :               widget.onSettingsUpdated?.call(settings);</span></span>
-<span id="L803"><span class="lineNum">     803</span> <span class="tlaUNC">           0 :               Navigator.of(context).pop();</span></span>
-<span id="L804"><span class="lineNum">     804</span>              :             } else {</span>
-<span id="L805"><span class="lineNum">     805</span> <span class="tlaUNC">           0 :               Navigator.of(context).pop(settings);</span></span>
-<span id="L806"><span class="lineNum">     806</span>              :             }</span>
-<span id="L807"><span class="lineNum">     807</span>              :           },</span>
-<span id="L808"><span class="lineNum">     808</span> <span class="tlaUNC">           0 :           child: Text(widget.isModification ? 'Update Settings' : 'Apply Settings'),</span></span>
-<span id="L809"><span class="lineNum">     809</span>              :         ),</span>
-<span id="L810"><span class="lineNum">     810</span>              :       ],</span>
-<span id="L811"><span class="lineNum">     811</span>              :     );</span>
-<span id="L812"><span class="lineNum">     812</span>              :   }</span>
-<span id="L813"><span class="lineNum">     813</span>              : </span>
-<span id="L814"><span class="lineNum">     814</span>              : // In simulation_controller.dart, add this to the SimulationController class:</span>
-<span id="L815"><span class="lineNum">     815</span>              : </span>
-<span id="L816"><span class="lineNum">     816</span>              : // In simulation_controller.dart add the updateMessageSettings method:</span>
-<span id="L817"><span class="lineNum">     817</span>              : </span>
-<span id="L818"><span class="lineNum">     818</span>              : </span>
-<span id="L819"><span class="lineNum">     819</span> <span class="tlaUNC">           0 :   Widget _buildPermissionSection(String title) {</span></span>
-<span id="L820"><span class="lineNum">     820</span> <span class="tlaUNC">           0 :     return Padding(</span></span>
-<span id="L821"><span class="lineNum">     821</span>              :       padding: const EdgeInsets.only(top: 16, bottom: 8),</span>
-<span id="L822"><span class="lineNum">     822</span> <span class="tlaUNC">           0 :       child: Text(</span></span>
-<span id="L823"><span class="lineNum">     823</span>              :         title,</span>
-<span id="L824"><span class="lineNum">     824</span> <span class="tlaUNC">           0 :         style: TextStyle(</span></span>
-<span id="L825"><span class="lineNum">     825</span>              :           fontWeight: FontWeight.bold,</span>
-<span id="L826"><span class="lineNum">     826</span>              :           fontSize: 16,</span>
-<span id="L827"><span class="lineNum">     827</span>              :         ),</span>
-<span id="L828"><span class="lineNum">     828</span>              :       ),</span>
-<span id="L829"><span class="lineNum">     829</span>              :     );</span>
-<span id="L830"><span class="lineNum">     830</span>              :   }</span>
-<span id="L831"><span class="lineNum">     831</span>              : }</span>
-<span id="L832"><span class="lineNum">     832</span>              : </span>
+<span id="L799"><span class="lineNum">     799</span>              :       ),</span>
+<span id="L800"><span class="lineNum">     800</span> <span class="tlaUNC">           0 :       actions: [</span></span>
+<span id="L801"><span class="lineNum">     801</span> <span class="tlaUNC">           0 :         TextButton(</span></span>
+<span id="L802"><span class="lineNum">     802</span> <span class="tlaUNC">           0 :           onPressed: () =&gt; Navigator.of(context).pop(), // Just close without calling onSettingsUpdated</span></span>
+<span id="L803"><span class="lineNum">     803</span> <span class="tlaUNC">           0 :           child: Text('Cancel'),</span></span>
+<span id="L804"><span class="lineNum">     804</span>              :         ),</span>
+<span id="L805"><span class="lineNum">     805</span> <span class="tlaUNC">           0 :         ElevatedButton(</span></span>
+<span id="L806"><span class="lineNum">     806</span> <span class="tlaUNC">           0 :           onPressed: () {</span></span>
+<span id="L807"><span class="lineNum">     807</span> <span class="tlaUNC">           0 :             if (widget.isModification) {</span></span>
+<span id="L808"><span class="lineNum">     808</span> <span class="tlaUNC">           0 :               widget.onSettingsUpdated?.call(settings);</span></span>
+<span id="L809"><span class="lineNum">     809</span> <span class="tlaUNC">           0 :               Navigator.of(context).pop();</span></span>
+<span id="L810"><span class="lineNum">     810</span>              :             } else {</span>
+<span id="L811"><span class="lineNum">     811</span> <span class="tlaUNC">           0 :               Navigator.of(context).pop(settings);</span></span>
+<span id="L812"><span class="lineNum">     812</span>              :             }</span>
+<span id="L813"><span class="lineNum">     813</span>              :           },</span>
+<span id="L814"><span class="lineNum">     814</span> <span class="tlaUNC">           0 :           child: Text(widget.isModification ? 'Update Settings' : 'Apply Settings'),</span></span>
+<span id="L815"><span class="lineNum">     815</span>              :         ),</span>
+<span id="L816"><span class="lineNum">     816</span>              :       ],</span>
+<span id="L817"><span class="lineNum">     817</span>              :     );</span>
+<span id="L818"><span class="lineNum">     818</span>              :   }</span>
+<span id="L819"><span class="lineNum">     819</span>              : </span>
+<span id="L820"><span class="lineNum">     820</span> <span class="tlaUNC">           0 :   Widget _buildPermissionSection(String title) {</span></span>
+<span id="L821"><span class="lineNum">     821</span> <span class="tlaUNC">           0 :     return Padding(</span></span>
+<span id="L822"><span class="lineNum">     822</span>              :       padding: const EdgeInsets.only(top: 16, bottom: 8),</span>
+<span id="L823"><span class="lineNum">     823</span> <span class="tlaUNC">           0 :       child: Text(</span></span>
+<span id="L824"><span class="lineNum">     824</span>              :         title,</span>
+<span id="L825"><span class="lineNum">     825</span> <span class="tlaUNC">           0 :         style: TextStyle(</span></span>
+<span id="L826"><span class="lineNum">     826</span>              :           fontWeight: FontWeight.bold,</span>
+<span id="L827"><span class="lineNum">     827</span>              :           fontSize: 16,</span>
+<span id="L828"><span class="lineNum">     828</span>              :         ),</span>
+<span id="L829"><span class="lineNum">     829</span>              :       ),</span>
+<span id="L830"><span class="lineNum">     830</span>              :     );</span>
+<span id="L831"><span class="lineNum">     831</span>              :   }</span>
+<span id="L832"><span class="lineNum">     832</span>              : }</span>
+<span id="L833"><span class="lineNum">     833</span>              : </span>
         </pre>
               </td>
             </tr>

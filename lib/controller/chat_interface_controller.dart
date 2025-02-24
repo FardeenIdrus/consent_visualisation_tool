@@ -374,7 +374,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
       content: _buildDialogContent(context),
       actions: _buildDialogActions(context),
       contentPadding: EdgeInsets.all(24),
-      actionsPadding: EdgeInsets.only(bottom: 16, right: 16, left: 16),
+      actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
     );
   }
 
@@ -393,7 +393,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
             Expanded(
               child: Text(
                 isSender ? 'Request to Share Image' : 'Request to View Image',
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.deepPurple,
                   fontSize: 20,
@@ -402,7 +402,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Divider(color: Colors.grey[300]),
       ],
     );
@@ -414,7 +414,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildConsentSection(context),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildRiskAcknowledgementSection(context),
       ],
     );
@@ -482,7 +482,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             '• This is a voluntary action\n'
-            '• No explanation is required for declining',
+            '• You have the option to decline',
             style: TextStyle(
               color: Colors.grey[800],
               height: 1.5,
@@ -607,7 +607,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
                 Expanded(
                   child: TextField(
                     controller: _secondsController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Seconds',
                       border: OutlineInputBorder(),
                       helperText: '0-59',
@@ -618,7 +618,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
                       if (seconds > 59) {
                         _secondsController.text = '59';
                         _secondsController.selection = TextSelection.fromPosition(
-                          TextPosition(offset: 2)
+                          const TextPosition(offset: 2)
                         );
                       }
                     },
@@ -626,10 +626,10 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             Container(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
@@ -637,7 +637,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'What this means:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -675,7 +675,7 @@ class _DynamicConsentDialogState extends State<DynamicConsentDialog> {
               'isVisible': true,
             });
           },
-          child: Text('Confirm'),
+          child: const Text('Confirm'),
         ),
       ],
     );
@@ -700,6 +700,7 @@ class GranularConsentDialog extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _GranularConsentDialogState createState() => _GranularConsentDialogState();
 }
 
@@ -822,7 +823,7 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
       padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 16,
         ),

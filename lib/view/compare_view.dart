@@ -26,7 +26,7 @@ class _CompareScreenState extends State<CompareScreen> {
     },
     'permissions': {
       'title': 'Permission Granularity',
-      'description': 'Technical controls and restrictions at the point of sharing',
+      'description': 'Technical controls and restrictions provided to the sender at the point of sharing',
       'icon': Icons.security_outlined,
     },
     'revocability': {

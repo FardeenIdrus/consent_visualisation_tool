@@ -61,8 +61,8 @@ case 'Affirmative Consent':
 case 'Dynamic Consent':
   return {
     'main': <String>[
-      'At point of set up:',
-      'The sender configures how often they want to review consent'
+      'Before sharing content:',
+      'The sender is provided an option to configure how often they want to review consent'
     ],
     'sub': <String>[
       'The sender then sets consent review frequency (hourly, daily, weekly)',

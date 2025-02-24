@@ -4,11 +4,10 @@ import '../model/chat_interface_model.dart';
 import '../theme/app_theme.dart';
 import '../controller/chat_interface_controller.dart';
 
-
-
 class MessageBubble extends StatelessWidget {
   final SimulationMessage message;
   final bool isReceiver;
+  final bool isRecipient2; 
   final VoidCallback? onConsentRequest;
   final bool canSave;
   final bool canForward;
@@ -18,9 +17,10 @@ class MessageBubble extends StatelessWidget {
   final SimulationController controller;
 
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.message,
     required this.isReceiver,
+     this.isRecipient2 = false,
     this.onConsentRequest,
     this.canSave = true,
     this.canForward = true,
@@ -28,29 +28,29 @@ class MessageBubble extends StatelessWidget {
     required this.onForward,
     this.onDelete,
     required this.controller,
-  }) : super(key: key);
+  });
 
-void _showGranularSettings(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => GranularConsentDialog(
-      initialSettings: message.additionalData,
-      isModification: true,
-      onSettingsUpdated: (newSettings) {
-        controller.updateMessageSettings(message, newSettings);
-      },
-    ),
-  );
-}
+  void _showGranularSettings(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => GranularConsentDialog(
+        initialSettings: message.additionalData,
+        isModification: true,
+        onSettingsUpdated: (newSettings) {
+          controller.updateMessageSettings(message, newSettings);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-if (isReceiver &&
-    message.type == MessageType.image &&
-    message.consentModel?.name == 'Affirmative Consent' &&
-    message.additionalData?['requiresRecipientConsent'] == true) {
-  return _buildConsentRequest(context);
-}
+    if (isReceiver &&
+        message.type == MessageType.image &&
+        message.consentModel?.name == 'Affirmative Consent' &&
+        message.additionalData?['requiresRecipientConsent'] == true) {
+      return _buildConsentRequest(context);
+    }
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       alignment: isReceiver ? Alignment.centerLeft : Alignment.centerRight,
@@ -78,7 +78,7 @@ if (isReceiver &&
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
           if (isAwaitingConsent) ...[
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Icon(Icons.pending_outlined, size: 12, color: Colors.grey[600]),
             Text(
               ' Awaiting consent',
@@ -124,7 +124,7 @@ if (isReceiver &&
       }
 
       return Container(
-        constraints: BoxConstraints(maxWidth: 240),
+        constraints: const BoxConstraints(maxWidth: 240),
         child: Stack(
           children: [
             ClipRRect(
@@ -156,46 +156,49 @@ if (isReceiver &&
                   ),
                 ),
               ),
-            if (controls.isNotEmpty || isReceiver || (isDynamicConsent && !isReceiver))
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...controls,
-                    if (isDynamicConsent && !isReceiver && canDelete)
-                      Container(
-                        margin: EdgeInsets.only(right: 8),
-                        child: _buildActionButton(
-                          icon: Icons.delete_outline,
-                          enabled: true,
-                          onPressed: () => onDelete?.call(context),
-                          label: 'Delete',
-                        ),
-                      ),
-                    if (isReceiver) ...[
-                      if (canSave)
-                        Container(
-                          margin: EdgeInsets.only(right: 8),
-                          child: _buildActionButton(
-                            icon: Icons.save_rounded,
-                            enabled: true,
-                            onPressed: () => onSave(context),
-                            label: 'Save',
-                          ),
-                        ),
-                      if (canForward)
-                        _buildActionButton(
-                          icon: Icons.forward_rounded,
-                          enabled: true,
-                          onPressed: () => onForward(context),
-                          label: 'Forward',
-                        ),
-                    ],
-                  ],
+             if (controls.isNotEmpty || isReceiver || (isDynamicConsent && !isReceiver))
+      Positioned(
+        bottom: 8,
+        right: 8,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...controls,
+            if (isDynamicConsent && !isReceiver && canDelete)
+              Container(
+                margin: EdgeInsets.only(right: 8),
+                child: _buildActionButton(
+                  icon: Icons.delete_outline,
+                  enabled: true,
+                  onPressed: () => onDelete?.call(context),
+                  label: 'Delete',
                 ),
               ),
+            if (isReceiver && !isRecipient2) ...[
+              // Save and forward buttons only for first recipient, not Recipient 2
+              if (canSave)
+                Container(
+                  margin: EdgeInsets.only(right: 8),
+                  child: _buildActionButton(
+                    icon: Icons.save_rounded,
+                    enabled: true,
+                    onPressed: () => onSave(context),
+                    label: 'Save',
+                  ),
+                ),
+              if (canForward)
+                _buildActionButton(
+                  icon: Icons.forward_rounded,
+                  enabled: true,
+                  onPressed: () => onForward(context),
+                  label: 'Forward',
+                ),
+            ] else if (isReceiver && isRecipient2) ...[
+              // No buttons at all for Recipient 2
+            ],
+          ],
+        ),
+      ),
           ],
         ),
       );

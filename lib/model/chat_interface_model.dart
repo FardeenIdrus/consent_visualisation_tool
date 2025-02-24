@@ -9,6 +9,7 @@ class SimulationMessage {
   final ConsentModel? consentModel;
   final Map<String, dynamic>? additionalData;
   final DateTime timestamp;
+  final SimulationMessage? forwardedFrom;
 
   SimulationMessage({
     required this.content,
@@ -16,6 +17,7 @@ class SimulationMessage {
     this.imageData,
     this.consentModel,
     this.additionalData,
+    this.forwardedFrom,
   }) : timestamp = DateTime.now();
 }
 
@@ -28,6 +30,7 @@ class SimulationModel {
   final _messageController = StreamController<List<SimulationMessage>>.broadcast();
   final BuildContext context;
   bool _isShowingDialog = false;  // Add flag to prevent multiple dialogs
+  List<SimulationMessage> forwardedMessages = [];
 
   SimulationModel(this.context) {
     // Check every second for both expired messages and consent re-evaluation
@@ -37,6 +40,11 @@ class SimulationModel {
     });
   }
 
+void addForwardedMessage(SimulationMessage message) {
+    forwardedMessages.add(message);
+    // Notify listeners that a new message has been forwarded
+    _messageController.add(messages);
+  }
 
 
   Stream<List<SimulationMessage>> get messageStream => _messageController.stream;
@@ -149,8 +157,9 @@ Future<void> _checkDynamicConsent() async {
     _messageController.add(messages);
   }
 
-  void clearMessages() {
+ void clearMessages() {
     messages.clear();
+    forwardedMessages.clear(); // Clear forwarded messages as well
     _messageController.add(messages);
   }
 
