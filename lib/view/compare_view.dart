@@ -218,16 +218,18 @@ Widget _buildDimensionSelector() {
 
   // Builds the main comparison section.
 Widget _buildComparison(List<ConsentModel> models) {
-  return Column(
-    children: [
-      _buildDimensionDescription(),
-      const SizedBox(height: 8),
-      Expanded(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth < 600) {
-              // For small screens, stack the panels vertically.
-              return SingleChildScrollView(
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (constraints.maxWidth < 600) {
+        // For small screens, stack panels vertically.
+        return Column(
+          children: [
+            _buildDimensionDescription(),
+            const SizedBox(height: 8),
+            // Divider with key outside ScrollView for easy test access
+            const Divider(key: Key('verticalDivider')),
+            Expanded(
+              child: SingleChildScrollView(
                 child: Column(
                   children: [
                     ConsentFlowVisualization(
@@ -241,10 +243,18 @@ Widget _buildComparison(List<ConsentModel> models) {
                     ),
                   ],
                 ),
-              );
-            } else {
-              // For larger screens, show side-by-side.
-              return Padding(
+              ),
+            ),
+          ],
+        );
+      } else {
+        // For larger screens, show side-by-side.
+        return Column(
+          children: [
+            _buildDimensionDescription(),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,14 +282,15 @@ Widget _buildComparison(List<ConsentModel> models) {
                     ),
                   ],
                 ),
-              );
-            }
-          },
-        ),
-      ),
-    ],
+              ),
+            ),
+          ],
+        );
+      }
+    },
   );
 }
+
 
 
   PreferredSizeWidget _buildAppBar() {

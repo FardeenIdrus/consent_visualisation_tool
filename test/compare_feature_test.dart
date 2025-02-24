@@ -1,4 +1,6 @@
 // test/compare_feature_test.dart
+import 'package:consent_visualisation_tool/theme/app_theme.dart';
+import 'package:consent_visualisation_tool/view/consent_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:consent_visualisation_tool/controller/compare_controller.dart';
@@ -202,7 +204,25 @@ void main() {
 
     expect(model.getConsentModification(ConsentModel.implied()), equals(expectedImplied));
   });
+
+  test('getInitialConsentProcess returns default data for unknown consent model', () {
+  // Create a dummy consent model with a name not covered by the switch.
+  final unknownModel = ConsentModel(name: 'Unknown Consent');
+  expect(model.getInitialConsentProcess(unknownModel), equals({'main': <String>[], 'sub': <String>[]}));
 });
+
+test('getControlMechanisms returns default data for unknown consent model', () {
+  final unknownModel = ConsentModel(name: 'Unknown Consent');
+  expect(model.getControlMechanisms(unknownModel), equals({'main': <String>[], 'sub': <String>[]}));
+});
+
+test('getConsentModification returns default data for unknown consent model', () {
+  final unknownModel = ConsentModel(name: 'Unknown Consent');
+  expect(model.getConsentModification(unknownModel), equals({'main': <String>[], 'sub': <String>[]}));
+});
+
+});
+
 
   // ----------------------------
   // CompareController Tests
@@ -257,89 +277,246 @@ void main() {
       controller.changeDimension('permissions');
       expect(controller.selectedDimension.value, 'permissions');
     });
+
+ // Verify that getFeatures returns the modification details when dimension is 'revocability'.
+    test('getFeatures returns correct data for revocability', () {
+  final informed = ConsentModel.informed();
+  // "revocability" should return what getConsentModification returns.
+  final result = controller.getFeatures(informed, 'revocability');
+  final expected = controller.model.getConsentModification(informed);
+  expect(result, equals(expected));
+});
+
+// Verify that getFeatures returns an empty map when dimension is not recognized.
+test('getFeatures returns default data for unknown dimension', () {
+  final informed = ConsentModel.informed();
+  // Passing an unknown dimension should return the default value.
+  final result = controller.getFeatures(informed, 'unknown');
+  expect(result, equals({'main': <String>[], 'sub': <String>[]}));
+});
   });
+
+
 
   // ----------------------------
   // CompareView Widget Tests
   // ----------------------------
-  group('CompareView Widget Tests', () {
-    // Test that when two models are selected, the compare view displays the dimension focus and model names.
-    testWidgets('model selection flow works correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: const CompareScreen(),
-        ),
-      );
+group('CompareView Widget Tests', () {
+  // Test that when two models are selected, the compare view displays the dimension focus and model names.
+  testWidgets('model selection flow works correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const CompareScreen(),
+      ),
+    );
 
-      // Tap the consent model chips for "Informed Consent" and "Granular Consent"
-      await tester.tap(find.text('Informed Consent').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Granular Consent').first);
-      await tester.pumpAndSettle();
+    // Tap the consent model chips for "Informed Consent" and "Granular Consent"
+    await tester.tap(find.text('Informed Consent').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Granular Consent').first);
+    await tester.pumpAndSettle();
 
-      // Verify that the dimension focus header is displayed and both model names appear.
-      expect(find.text('Dimension Focus'), findsOneWidget);
-      expect(find.textContaining('Informed Consent'), findsWidgets);
-      expect(find.textContaining('Granular Consent'), findsWidgets);
-    });
-
-    // Test that changing the dimension updates the displayed comparison details.
-    testWidgets('dimension changing works', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: const CompareScreen(),
-        ),
-      );
-
-      // Select two models.
-      await tester.tap(find.text('Informed Consent').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Granular Consent').first);
-      await tester.pumpAndSettle();
-
-      // Tap on the 'Permission Granularity' chip to change the dimension.
-      await tester.tap(find.text('Permission Granularity'));
-      await tester.pumpAndSettle();
-
-      // Verify that the dimension description contains expected text 
-      expect(find.textContaining('Technical controls'), findsOneWidget);
-    });
-
-    // Test navigation from the compare screen to the simulation screen.
-    testWidgets('navigation to simulation works', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: const CompareScreen(),
-        ),
-      );
-
-      // Select two models.
-      await tester.tap(find.text('Informed Consent').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Granular Consent').first);
-      await tester.pumpAndSettle();
-      
-      // Tap the button that navigates to the simulation screen.
-      await tester.tap(find.text('See how these models work in a chat interface'));
-      await tester.pumpAndSettle();
-      
-      // Verify that the SimulationScreen is displayed.
-      expect(find.byType(SimulationScreen), findsOneWidget);
-    });
-
-    // New Test: Verify that when fewer than two models are selected, the selection prompt is displayed.
-    testWidgets('displays selection prompt when fewer than two models are selected', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: const CompareScreen(),
-        ),
-      );
-
-      // No models are selected.
-      expect(find.text('Choose Two Models'), findsOneWidget);
-      expect(find.text('Select two consent models to explore their unique characteristics'), findsOneWidget);
-    });
+    // Verify that the dimension focus header is displayed and both model names appear.
+    expect(find.text('Dimension Focus'), findsOneWidget);
+    expect(find.textContaining('Informed Consent'), findsWidgets);
+    expect(find.textContaining('Granular Consent'), findsWidgets);
   });
+
+  // Test that changing the dimension updates the displayed comparison details.
+  testWidgets('dimension changing works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const CompareScreen(),
+      ),
+    );
+
+    // Select two models.
+    await tester.tap(find.text('Informed Consent').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Granular Consent').first);
+    await tester.pumpAndSettle();
+
+    // Tap on the 'Permission Granularity' chip to change the dimension.
+    await tester.tap(find.text('Permission Granularity'));
+    await tester.pumpAndSettle();
+
+    // Verify that the dimension description contains expected text.
+    expect(find.textContaining('Technical controls'), findsOneWidget);
+  });
+
+  // Test navigation from the compare screen to the simulation screen.
+  testWidgets('navigation to simulation works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const CompareScreen(),
+      ),
+    );
+
+    // Select two models.
+    await tester.tap(find.text('Informed Consent').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Granular Consent').first);
+    await tester.pumpAndSettle();
+    
+    // Tap the button that navigates to the simulation screen.
+    await tester.tap(find.text('See how these models work in a chat interface'));
+    await tester.pumpAndSettle();
+    
+    // Verify that the SimulationScreen is displayed.
+    expect(find.byType(SimulationScreen), findsOneWidget);
+  });
+
+  // New Test: Verify that when fewer than two models are selected, the selection prompt is displayed.
+  testWidgets('displays selection prompt when fewer than two models are selected', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const CompareScreen(),
+      ),
+    );
+
+    // No models are selected.
+    expect(find.text('Choose Two Models'), findsOneWidget);
+    expect(find.text('Select two consent models to explore their unique characteristics'), findsOneWidget);
+  });
+
+  // New Test: Verify that when "Affirmative Consent" is selected (which uses pathways),
+  // the pathway steps are rendered by _buildPathwaySteps.
+  testWidgets('renders pathway steps for Affirmative Consent', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const CompareScreen(),
+      ),
+    );
+    // Tap the chips for "Affirmative Consent" and "Granular Consent"
+    await tester.tap(find.text('Affirmative Consent').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Granular Consent').first);
+    await tester.pumpAndSettle();
+    
+    // Since Affirmative Consent returns a map with 'type': 'pathways', _buildPathwaySteps is executed.
+    // Verify that the pathway titles appear.
+    expect(find.text('Sender-Initiated Sharing'), findsOneWidget);
+    expect(find.text('Recipient Requests Image'), findsOneWidget);
+  });
+
+});
+
+
+// Add this new group at the end of your existing test file
+group('ConsentFlowVisualization Widget Tests', () {
+  testWidgets('renders all steps and allows expanding/collapsing', (WidgetTester tester) async {
+    // Create sample steps for testing
+    final steps = [
+      ConsentStep(
+        title: 'Step 1',
+        icon: Icons.check_circle_outline,
+        details: ['Detail 1', 'Detail 2'],
+      ),
+      ConsentStep(
+        title: 'Step 2',
+        icon: Icons.settings_outlined,
+        details: ['Detail 3', 'Detail 4', 'Detail 5'],
+      ),
+    ];
+
+    // Build our widget
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: AppTheme.primaryColor,
+          colorScheme: const ColorScheme.light(primary: AppTheme.primaryColor),
+        ),
+        home: Scaffold(
+          body: ConsentFlowVisualization(
+            modelName: 'Test Model',
+            steps: steps,
+          ),
+        ),
+      ),
+    );
+
+    // Verify model name is displayed
+    expect(find.text('Test Model'), findsOneWidget);
+    
+    // Verify step titles are displayed
+    expect(find.text('Step 1'), findsOneWidget);
+    expect(find.text('Step 2'), findsOneWidget);
+    
+    // Initially, details should not be visible (collapsed)
+    expect(find.text('Detail 1'), findsNothing);
+    expect(find.text('Detail 3'), findsNothing);
+
+    // Tap on first step to expand it
+    await tester.tap(find.text('Step 1'));
+    await tester.pumpAndSettle();
+    
+    // Now the details for the first step should be visible
+    expect(find.text('Detail 1'), findsOneWidget);
+    expect(find.text('Detail 2'), findsOneWidget);
+    
+    // But the second step's details should still be hidden
+    expect(find.text('Detail 3'), findsNothing);
+    
+    // Tap on second step to expand it
+    await tester.tap(find.text('Step 2'));
+    await tester.pumpAndSettle();
+    
+    // Now the first step should collapse and the second step should expand
+    expect(find.text('Detail 1'), findsNothing);
+    expect(find.text('Detail 3'), findsOneWidget);
+    expect(find.text('Detail 4'), findsOneWidget);
+    expect(find.text('Detail 5'), findsOneWidget);
+    
+    // Tap on second step again to collapse it
+    await tester.tap(find.text('Step 2'));
+    await tester.pumpAndSettle();
+    
+    // Now all details should be hidden again
+    expect(find.text('Detail 1'), findsNothing);
+    expect(find.text('Detail 3'), findsNothing);
+    
+    // Verify presence of chevron icons in the collapsed state
+    expect(find.byIcon(Icons.expand_more), findsNWidgets(2));
+  });
+
+  testWidgets('renders chevron_right icons when showing details', (WidgetTester tester) async {
+    // Create sample steps for testing
+    final steps = [
+      ConsentStep(
+        title: 'Step with Details',
+        icon: Icons.check_circle_outline,
+        details: ['Detail with chevron'],
+      ),
+    ];
+
+    // Build our widget
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          primaryColor: AppTheme.primaryColor,
+          colorScheme: ColorScheme.light(primary: AppTheme.primaryColor),
+        ),
+        home: Scaffold(
+          body: ConsentFlowVisualization(
+            modelName: 'Test Model',
+            steps: steps,
+          ),
+        ),
+      ),
+    );
+
+    // Tap to expand the step
+    await tester.tap(find.text('Step with Details'));
+    await tester.pumpAndSettle();
+    
+    // Verify the detail is shown
+    expect(find.text('Detail with chevron'), findsOneWidget);
+    
+    // Verify the chevron_right icon is present next to the detail
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+  });
+});
+
 }
 
 

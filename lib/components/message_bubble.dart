@@ -30,18 +30,18 @@ class MessageBubble extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  void _showGranularSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => GranularConsentDialog(
-        initialSettings: message.additionalData,
-        isModification: true,
-        onSettingsUpdated: (newSettings) {
-          controller.updateMessageSettings(message, newSettings);
-        },
-      ),
-    );
-  }
+void _showGranularSettings(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => GranularConsentDialog(
+      initialSettings: message.additionalData,
+      isModification: true,
+      onSettingsUpdated: (newSettings) {
+        controller.updateMessageSettings(message, newSettings);
+      },
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
