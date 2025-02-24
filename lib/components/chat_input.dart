@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
+/// A widget that provides a chat input area with an optional image preview.
 class ChatInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onImagePick;
@@ -10,6 +11,13 @@ class ChatInput extends StatelessWidget {
   final Uint8List? pendingImage;
   final VoidCallback onClearImage;
 
+  /// Constructs a [ChatInput] widget.
+  ///
+  /// [controller] is used to control the text input.
+  /// [onImagePick] is called when the image picker button is pressed.
+  /// [onSend] is called when the send button is pressed.
+  /// [pendingImage] is the image data to be previewed, if available.
+  /// [onClearImage] is called to clear the selected image.
   const ChatInput({
     super.key,
     required this.controller,
@@ -30,6 +38,7 @@ class ChatInput extends StatelessWidget {
             color: Colors.grey[100],
             child: Row(
               children: [
+                // Display the selected image with a close button to remove it
                 Stack(
                   children: [
                     ClipRRect(
@@ -66,6 +75,7 @@ class ChatInput extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 12),
+                // Text indicating the image is ready to be sent
                 Expanded(
                   child: Text(
                     'Image ready to send',
@@ -94,10 +104,12 @@ class ChatInput extends StatelessWidget {
           ),
           child: Row(
             children: [
+              // Button to pick an image from the gallery
               IconButton(
                 icon: const Icon(Icons.image_rounded, color: AppTheme.primaryColor),
                 onPressed: onImagePick,
               ),
+              // Text input field for message typing
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -118,6 +130,7 @@ class ChatInput extends StatelessWidget {
                   ),
                 ),
               ),
+              // Button to send the message
               Container(
                 decoration: const BoxDecoration(
                   color: AppTheme.primaryColor,

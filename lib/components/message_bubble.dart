@@ -1,9 +1,14 @@
 // lib/components/message_bubble.dart
+// A widget that displays a message bubble with an optional image
+// and optional controls for saving, forwarding, and deleting the message.
+
 import 'package:flutter/material.dart';
 import '../model/chat_interface_model.dart';
 import '../theme/app_theme.dart';
 import '../controller/chat_interface_controller.dart';
 
+/// A widget that displays a message bubble with an optional image
+/// and optional controls for saving, forwarding, and deleting the message.
 class MessageBubble extends StatelessWidget {
   final SimulationMessage message;
   final bool isReceiver;
@@ -30,6 +35,7 @@ class MessageBubble extends StatelessWidget {
     required this.controller,
   });
 
+  /// Opens a dialog to modify the granular consent settings for the message.
   void _showGranularSettings(BuildContext context) {
     showDialog(
       context: context,
@@ -64,6 +70,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  /// Builds the header of the message bubble, which displays the consent model name.
   Widget _buildHeader() {
     bool isAwaitingConsent = message.consentModel?.name == 'Affirmative Consent' &&
                             message.additionalData?['requiresRecipientConsent'] == true;
@@ -90,6 +97,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  /// Builds the content of the message bubble, which displays the image and the controls.
   Widget _buildContent(BuildContext context) {
     if (message.type == MessageType.image) {
       bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
@@ -194,7 +202,7 @@ class MessageBubble extends StatelessWidget {
                   label: 'Forward',
                 ),
             ] else if (isReceiver && isRecipient2) ...[
-              // No buttons at all for Recipient 2
+              
             ],
           ],
         ),
@@ -221,6 +229,8 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  /// Builds a consent request bubble that is displayed when the receiver is
+  /// required to consent to receive an image.
   Widget _buildConsentRequest(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(16),
@@ -264,6 +274,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
+  /// Builds a button for the controls.
   Widget _buildActionButton({
     required IconData icon,
     required bool enabled,
