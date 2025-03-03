@@ -536,7 +536,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       
       // Verify dialog title and content for recipient
       expect(find.text('Request to View Image'), findsOneWidget);
-      expect(find.text('Confirming Willingness to Receive'), findsOneWidget);
+      expect(find.text('Confirming Willingness to View an Image'), findsOneWidget);
       
       // Verify buttons
       expect(find.text('Decline'), findsOneWidget);

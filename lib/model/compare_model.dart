@@ -13,46 +13,47 @@ class CompareScreenModel {
 
 Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
   switch (model.name) {
-    case 'Informed Consent':
-      return {
-        'main': <String>[
-          'Before sharing an Image:',
-          'The sender is presented with a comprehensive risk disclosure panel',
-          'The sender must actively acknowledge understanding of risks'
-        ],
-        'sub': <String>[
-          'The risks presented include:',
-          'Digital permanence risks',
-          'Distribution risks',
-          'Control limitation risks',
-          'Future impact risks',
-          'Security risks'
-        ],
-        'additional': <String>[
-          'Each risk requires explicit acknowledgment',
-          'Sharing disabled until all risks are understood',
-          'No recipient confirmation is required'
-        ]
-      };
-    case 'Affirmative Consent':
-      return {
-        'main': <String>[
-          'Before sharing an Image:',
-          'The sender is presented with comprehensive risk disclosure panel similar to Informed Consent',
-          'Both sender and recipient must actively confirm participation'
-        ],
-        'sub': <String>[
-          'Sender must check acknowledgment boxes for each risk',
-          'Sender must explicitly confirm willing participation',
-          'Recipient must actively confirm willingness to receive',
-          'Clear decline option is provided at each step to both sender and recipient'
-        ],
-        'additional': <String>[
-          'Dual-party confirmation is mandatory',
-          'No image sharing occurs without both parties agreeing',
-          'Consent is specific to each individual sharing instance'
-        ]
-      };
+case 'Informed Consent':
+  return {
+    'main': <String>[
+      'Before sharing an Image:',
+      'The sender is presented with a list of potential risks surrounding the sharing of intimate images digitally',
+      'The sender must actively acknowledge understanding of each risk'
+    ],
+    'sub': <String>[
+      'The risks presented include:',
+      'Digital permanence risks',
+      'Distribution risks',
+      'Control limitation risks',
+      'Future impact risks',
+      'Security risks'
+    ],
+    'additional': <String>[
+      'Each risk requires explicit acknowledgment from the sender',
+      'Sender must check acknowledgment boxes for each risk',
+      'Consent is specific to each instance of image sharing',
+    ]
+  };
+
+case 'Affirmative Consent':
+  return {
+  'main': <String>[
+  'Before sharing an image:',
+  'The sender is presented with a list of potential risks surrounding digital intimate image sharing',
+  'Both sender and recipient must actively confirm their participation'
+],
+'sub': <String>[
+  'The sender must check acknowledgment boxes for each risk',
+  'The sender must explicitly confirm their willingness to share',
+  'The recipient must actively confirm their willingness to receive',
+  'Clear options to decline are provided at each step for both parties'
+],
+'additional': <String>[
+  'Dual-party confirmation is mandatory',
+  'Image sharing only occurs when both parties agree',
+  'Consent is specific to each instance of image sharing',
+]
+  };
 case 'Dynamic Consent':
   return {
     'main': <String>[
@@ -71,7 +72,7 @@ case 'Dynamic Consent':
       // Existing implementation remains unchanged
       return {
         'main': <String>[
-          'At point of set up:',
+          'Before sharing an image:',
           'The sender is presented with a list of permissions settings',
           'The sender must configure detailed permission settings',
         ],
@@ -89,7 +90,7 @@ case 'Dynamic Consent':
       // Existing implementation remains unchanged
       return {
         'main': <String>[
-          'At point of set up:',
+          'Before sharing an image:',
           'No explicit consent mechanism is presented to the sender',
           'Consent is assumed through user actions'
         ],

@@ -38,8 +38,8 @@ test('getInitialConsentProcess returns correct data for Informed Consent', () {
   final expectedInformed = {
     'main': <String>[
       'Before sharing an Image:',
-      'The sender is presented with a comprehensive risk disclosure panel',
-      'The sender must actively acknowledge understanding of risks'
+      'The sender is presented with a list of potential risks surrounding the sharing of intimate images digitally',
+      'The sender must actively acknowledge understanding of each risk'
     ],
     'sub': <String>[
       'The risks presented include:',
@@ -50,9 +50,9 @@ test('getInitialConsentProcess returns correct data for Informed Consent', () {
       'Security risks'
     ],
     'additional': <String>[
-      'Each risk requires explicit acknowledgment',
-      'Sharing disabled until all risks are understood',
-      'No recipient confirmation is required'
+      'Each risk requires explicit acknowledgment from the sender',
+      'Sender must check acknowledgment boxes for each risk',
+      'Consent is specific to each instance of image sharing'
     ]
   };
   
@@ -62,22 +62,22 @@ test('getInitialConsentProcess returns correct data for Informed Consent', () {
   // Verify that the initial consent process map for Affirmative Consent is correct.
 test('getInitialConsentProcess returns correct data for Affirmative Consent', () {
   final expectedAffirmative = {
-    'main': <String>[
-      'Before sharing an Image:',
-      'The sender is presented with comprehensive risk disclosure panel similar to Informed Consent',
-      'Both sender and recipient must actively confirm participation'
-    ],
-    'sub': <String>[
-      'Sender must check acknowledgment boxes for each risk',
-      'Sender must explicitly confirm willing participation',
-      'Recipient must actively confirm willingness to receive',
-      'Clear decline option is provided at each step to both sender and recipient'
-    ],
-    'additional': <String>[
-      'Dual-party confirmation is mandatory',
-      'No image sharing occurs without both parties agreeing',
-      'Consent is specific to each individual sharing instance'
-    ]
+  'main': <String>[
+  'Before sharing an image:',
+  'The sender is presented with a list of potential risks surrounding digital intimate image sharing',
+  'Both sender and recipient must actively confirm their participation'
+],
+'sub': <String>[
+  'The sender must check acknowledgment boxes for each risk',
+  'The sender must explicitly confirm their willingness to share',
+  'The recipient must actively confirm their willingness to receive',
+  'Clear options to decline are provided at each step for both parties'
+],
+'additional': <String>[
+  'Dual-party confirmation is mandatory',
+  'Image sharing only occurs when both parties agree',
+  'Consent is specific to each instance of image sharing',
+]
   };
   
   expect(model.getInitialConsentProcess(ConsentModel.affirmative()), equals(expectedAffirmative));
@@ -105,7 +105,7 @@ test('getInitialConsentProcess returns correct data for Dynamic Consent', () {
   // Verify that the initial consent process map for Granular Consent is correct.
   test('getInitialConsentProcess returns correct data for Granular Consent', () {
     final expectedGranular = {
-      'main': ['At point of set up:', 'The sender is presented with a list of permissions settings', 'The sender must configure detailed permission settings'],
+      'main': ['Before sharing an image:', 'The sender is presented with a list of permissions settings', 'The sender must configure detailed permission settings'],
       'sub': ['Define content viewing duration', 'Configure saving restrictions', 'Configure sharing restrictions'],
       'additional': ['Each permission setting requires explicit configuration', 'All settings must be configured before sharing']
     };
@@ -113,10 +113,10 @@ test('getInitialConsentProcess returns correct data for Dynamic Consent', () {
     expect(model.getInitialConsentProcess(ConsentModel.granular()), equals(expectedGranular));
   });
 
-  // Verify that the initial consent process map for Granular Consent is correct.
+  // Verify that the initial consent process map for Implied Consent is correct.
   test('getInitialConsentProcess returns correct data for Implied Consent', () {
     final expectedImplied = {
-      'main': ['At point of set up:', 'No explicit consent mechanism is presented to the sender', 'Consent is assumed through user actions'],
+      'main': ['Before sharing an image:', 'No explicit consent mechanism is presented to the sender', 'Consent is assumed through user actions'],
       'sub': ['No risk disclosure information is provided to the sender', 'No explicit confirmation required', 'No consent configuration options are presented to the sender'],
       'additional': ['Relies purely on assumption of consent through behavior', 'No safeguards or confirmations in place']
     };
