@@ -81,7 +81,7 @@ void main() {
       // Verify tabs are displayed
       expect(find.text('Sender'), findsOneWidget);
       expect(find.text('Recipient'), findsOneWidget);
-      expect(find.text('Third party Recipient'), findsOneWidget);
+      expect(find.text('Third Party Recipient'), findsOneWidget);
       
       // Verify consent model selector is displayed
       expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
