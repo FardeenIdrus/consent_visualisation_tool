@@ -34,32 +34,54 @@ void main() {
     });
 
     // Verify that the initial consent process map for Informed Consent is correct.
-   test('getInitialConsentProcess returns correct data for Informed Consent', () {
-    final expectedInformed = {
-      'main': ['Before sharing content:', 'The sender is presented with a comprehensive risk disclosure panel', 'The sender must actively acknowledge understanding of risks'],
-      'risk_disclosure': ['The risk disclosure panel includes the following risks:', 'Digital Permanence: Once shared, images can persist indefinitely in digital spaces, creating potential for future misuse.', 'Distribution Risks: Once shared, images can be copied, saved, or redistributed without your discretion, even if initially shared within a consensual exchange.', 'Control Limitations: After sharing, you will have limited ability to control how your images are stored, shared, or used by others.', 'Future Impact: Shared images may have long-term consequences for personal relationships, professional opportunities, and overall wellbeing.', 'Security Risks: There is potential for third-party interception, unauthorized access, or data breaches of shared images.'],
-      'additional': ['Each risk requires explicit acknowledgment', 'Sharing disabled until all risks are understood']
-    };
-
-    expect(model.getInitialConsentProcess(ConsentModel.informed()), equals(expectedInformed));
-  });
+test('getInitialConsentProcess returns correct data for Informed Consent', () {
+  final expectedInformed = {
+    'main': <String>[
+      'Before sharing content:',
+      'The sender is presented with a comprehensive risk disclosure panel',
+      'The sender must actively acknowledge understanding of risks'
+    ],
+    'sub': <String>[
+      'The risks presented include:',
+      'Digital permanence risks',
+      'Distribution risks',
+      'Control limitation risks',
+      'Future impact risks',
+      'Security risks'
+    ],
+    'additional': <String>[
+      'Each risk requires explicit acknowledgment',
+      'Sharing disabled until all risks are understood',
+      'No recipient confirmation is required'
+    ]
+  };
+  
+  expect(model.getInitialConsentProcess(ConsentModel.informed()), equals(expectedInformed));
+});
 
   // Verify that the initial consent process map for Affirmative Consent is correct.
-  test('getInitialConsentProcess returns correct data for Affirmative Consent', () {
-    final expectedAffirmative = {
-      'type': 'pathways',
-      'pathway1': {
-        'title': 'Sender-Initiated Sharing',
-        'steps': ['The sender is presented with the same risk disclosure as Informed Consent when they attempt to share an image', 'The sender must check acknowledgment boxes for each risk', 'The sender cannot proceed without acknowledging all risks', 'The sender is prompted: "Do you enthusiastically agree to share this image?"', 'Sender must explicitly confirm their willing participation', 'Recipient must actively confirm their willingness to receive', 'Clear decline option is provided at each step for both sender and recipient']
-      },
-      'pathway2': {
-        'title': 'Recipient Requests Image',
-        'steps': ['Recipient initiates image request', 'The sender is presented with the request', 'If the sender accepts the request, they see the same risk disclosure as Informed Consent', 'Sender must check acknowledgment boxes for each risk', 'Sender is prompted: "Do you enthusiastically agree to share this image?"', 'Only if the sender agrees, will the recipient receive the image', 'Clear decline option is provided at each step to the sender']
-      }
-    };
-
-    expect(model.getInitialConsentProcess(ConsentModel.affirmative()), equals(expectedAffirmative));
-  });
+test('getInitialConsentProcess returns correct data for Affirmative Consent', () {
+  final expectedAffirmative = {
+    'main': <String>[
+      'Before sharing content:',
+      'The sender is presented with comprehensive risk disclosure panel similar to Informed Consent',
+      'Both sender and recipient must actively confirm participation'
+    ],
+    'sub': <String>[
+      'Sender must check acknowledgment boxes for each risk',
+      'Sender must explicitly confirm willing participation',
+      'Recipient must actively confirm willingness to receive',
+      'Clear decline option is provided at each step to both sender and recipient'
+    ],
+    'additional': <String>[
+      'Dual-party confirmation is mandatory',
+      'No image sharing occurs without both parties agreeing',
+      'Consent is specific to each individual sharing instance'
+    ]
+  };
+  
+  expect(model.getInitialConsentProcess(ConsentModel.affirmative()), equals(expectedAffirmative));
+});
 
   // Verify that the initial consent process map for Dynamic Consent is correct.
   test('getInitialConsentProcess returns correct data for Dynamic Consent', () {

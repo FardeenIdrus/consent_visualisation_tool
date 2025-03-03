@@ -81,7 +81,7 @@ void main() {
       // Verify tabs are displayed
       expect(find.text('Sender'), findsOneWidget);
       expect(find.text('Recipient'), findsOneWidget);
-      expect(find.text('Recipient 2'), findsOneWidget);
+      expect(find.text('Third Party'), findsOneWidget);
       
       // Verify consent model selector is displayed
       expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
@@ -1005,7 +1005,10 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       expect(find.text('Image forwarded!'), findsNothing);
     });
   });
+  
 }
+
+
 
 // Helper method to directly test _showActionAnimation
 void _showActionAnimation(BuildContext context, String action) {
