@@ -81,7 +81,7 @@ void main() {
       // Verify tabs are displayed
       expect(find.text('Sender'), findsOneWidget);
       expect(find.text('Recipient'), findsOneWidget);
-      expect(find.text('Third Party'), findsOneWidget);
+      expect(find.text('Third party Recipient'), findsOneWidget);
       
       // Verify consent model selector is displayed
       expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
@@ -93,7 +93,7 @@ void main() {
       await tester.tap(find.text('Recipient'));
       await tester.pumpAndSettle();
       
-      await tester.tap(find.text('Recipient 2'));
+      await tester.tap(find.text('Third Party Recipient'));
       await tester.pumpAndSettle();
       
       await tester.tap(find.text('Sender'));
@@ -260,7 +260,7 @@ void main() {
       await tester.pumpAndSettle();
       
       // Verify dialog title and content
-      expect(find.text('Informed Consent for Image Sharing'), findsOneWidget);
+      expect(find.text('Consent for Image Sharing'), findsOneWidget);
       expect(find.text('Please carefully review and acknowledge the following risks:'), findsOneWidget);
       
       // Verify the risk items are present
@@ -374,14 +374,14 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
   await tester.pumpAndSettle();
   
   // Verify dialog is showing
-  expect(find.text('Informed Consent for Image Sharing'), findsOneWidget);
+  expect(find.text('Consent for Image Sharing'), findsOneWidget);
   
   // Tap Cancel button
   await tester.tap(find.text('Cancel'));
   await tester.pumpAndSettle();
   
   // Verify dialog is dismissed
-  expect(find.text('Informed Consent for Image Sharing'), findsNothing);
+  expect(find.text('Consent for Image Sharing'), findsNothing);
   
   // Show dialog again
   await tester.tap(find.text('Show Dialog'));
@@ -484,7 +484,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       await tester.pumpAndSettle();
       
       // Verify dialog title and content
-      expect(find.text('Request to Share Image'), findsOneWidget);
+      expect(find.text('Confirmation of sharing'), findsOneWidget);
       expect(find.text('Confirming Intention to Share'), findsOneWidget);
       
       // Verify buttons
@@ -496,7 +496,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       await tester.pumpAndSettle();
       
       // Dialog should be dismissed
-      expect(find.text('Request to Share Image'), findsNothing);
+      expect(find.text('Confirmation of sharing'), findsNothing);
       
       // Open dialog again to test confirm button
       await tester.tap(find.text('Show Dialog'));
@@ -507,7 +507,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       await tester.pumpAndSettle();
       
       // Dialog should be dismissed
-      expect(find.text('Request to Share Image'), findsNothing);
+      expect(find.text('Confirmation of sharing'), findsNothing);
     });
     
     testWidgets('4.4 Recipient Affirmative Consent Dialog', (WidgetTester tester) async {

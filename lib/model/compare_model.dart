@@ -16,7 +16,7 @@ Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
     case 'Informed Consent':
       return {
         'main': <String>[
-          'Before sharing content:',
+          'Before sharing an Image:',
           'The sender is presented with a comprehensive risk disclosure panel',
           'The sender must actively acknowledge understanding of risks'
         ],
@@ -37,7 +37,7 @@ Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
     case 'Affirmative Consent':
       return {
         'main': <String>[
-          'Before sharing content:',
+          'Before sharing an Image:',
           'The sender is presented with comprehensive risk disclosure panel similar to Informed Consent',
           'Both sender and recipient must actively confirm participation'
         ],
@@ -53,22 +53,20 @@ Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
           'Consent is specific to each individual sharing instance'
         ]
       };
-    case 'Dynamic Consent':
-      // Existing implementation remains unchanged
-      return {
-        'main': <String>[
-          'At point of set up:',
-          'The sender configures how often they want to review consent'
-        ],
-        'sub': <String>[
-          'The sender then sets consent review frequency (hourly, daily, weekly)',
-          'Configure notification preferences for review reminders',
-        ],
-        'additional': <String>[
-          'The system explains how ongoing consent management works',
-          'The sender must understand the implications of their chosen review schedule'
-        ]
-      };
+case 'Dynamic Consent':
+  return {
+    'main': <String>[
+      'Before sharing an image:',
+      'The sender is provided an option to configure how often they want to review consent'
+    ],
+    'sub': <String>[
+      'The sender then sets consent review frequency (hourly, daily, weekly)',
+      'Configure notification preferences for review reminders',
+    ],
+    'additional': <String>[
+      'The system explains the ongoing consent management process and review options'
+    ]
+  };
     case 'Granular Consent':
       // Existing implementation remains unchanged
       return {

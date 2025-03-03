@@ -148,7 +148,7 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
             children: [
               _buildTabButton('Sender', 0),
               _buildTabButton('Recipient', 1),
-               _buildTabButton('Third party', 2),
+               _buildTabButton('Third party Recipient', 2),
             ],
           ),
         ),

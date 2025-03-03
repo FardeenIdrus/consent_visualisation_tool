@@ -184,7 +184,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text(
-        'Informed Consent for Image Sharing',
+        'Consent for Image Sharing',
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Colors.deepPurple,
@@ -396,7 +396,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                isSender ? 'Request to Share Image' : 'Request to View Image',
+                isSender ? 'Confirmation of sharing' : 'Request to View Image',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.deepPurple,
@@ -438,7 +438,7 @@ class AffirmativeConsentDialog extends StatelessWidget {
           Text(
             isSender 
               ? 'Confirming Intention to Share' 
-              : 'Confirming Willingness to Receive',
+              : 'Confirming Willingness to View an Image',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.purple[800],

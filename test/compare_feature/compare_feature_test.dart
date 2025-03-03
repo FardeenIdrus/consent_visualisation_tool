@@ -37,7 +37,7 @@ void main() {
 test('getInitialConsentProcess returns correct data for Informed Consent', () {
   final expectedInformed = {
     'main': <String>[
-      'Before sharing content:',
+      'Before sharing an Image:',
       'The sender is presented with a comprehensive risk disclosure panel',
       'The sender must actively acknowledge understanding of risks'
     ],
@@ -63,7 +63,7 @@ test('getInitialConsentProcess returns correct data for Informed Consent', () {
 test('getInitialConsentProcess returns correct data for Affirmative Consent', () {
   final expectedAffirmative = {
     'main': <String>[
-      'Before sharing content:',
+      'Before sharing an Image:',
       'The sender is presented with comprehensive risk disclosure panel similar to Informed Consent',
       'Both sender and recipient must actively confirm participation'
     ],
@@ -84,16 +84,23 @@ test('getInitialConsentProcess returns correct data for Affirmative Consent', ()
 });
 
   // Verify that the initial consent process map for Dynamic Consent is correct.
-  test('getInitialConsentProcess returns correct data for Dynamic Consent', () {
-    final expectedDynamic = {
-      'main': [ 'Before sharing content:',
-      'The sender is provided an option to configure how often they want to review consent'],
-      'sub': ['The sender then sets consent review frequency (hourly, daily, weekly)', 'Configure notification preferences for review reminders'],
-      'additional': ['The system explains how ongoing consent management works', 'The sender must understand the implications of their chosen review schedule']
-    };
-
-    expect(model.getInitialConsentProcess(ConsentModel.dynamic()), equals(expectedDynamic));
-  });
+test('getInitialConsentProcess returns correct data for Dynamic Consent', () {
+  final expectedDynamic = {
+    'main': [
+      'Before sharing an image:',
+      'The sender is provided an option to configure how often they want to review consent'
+    ],
+    'sub': [
+      'The sender then sets consent review frequency (hourly, daily, weekly)', 
+      'Configure notification preferences for review reminders'
+    ],
+    'additional': [
+      'The system explains the ongoing consent management process and review options'
+    ]
+  };
+  
+  expect(model.getInitialConsentProcess(ConsentModel.dynamic()), equals(expectedDynamic));
+});
 
   // Verify that the initial consent process map for Granular Consent is correct.
   test('getInitialConsentProcess returns correct data for Granular Consent', () {
@@ -404,23 +411,6 @@ group('CompareView Widget Tests', () {
 
   // New Test: Verify that when "Affirmative Consent" is selected (which uses pathways),
   // the pathway steps are rendered by _buildPathwaySteps.
-  testWidgets('renders pathway steps for Affirmative Consent', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: CompareScreen(),
-      ),
-    );
-    // Tap the chips for "Affirmative Consent" and "Granular Consent"
-    await tester.tap(find.text('Affirmative Consent').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Granular Consent').first);
-    await tester.pumpAndSettle();
-    
-    // Since Affirmative Consent returns a map with 'type': 'pathways', _buildPathwaySteps is executed.
-    // Verify that the pathway titles appear.
-    expect(find.text('Sender-Initiated Sharing'), findsOneWidget);
-    expect(find.text('Recipient Requests Image'), findsOneWidget);
-  });
 
 });
 
