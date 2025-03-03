@@ -71,31 +71,65 @@ class MessageBubble extends StatelessWidget {
   }
 
   /// Builds the header of the message bubble, which displays the consent model name.
-  Widget _buildHeader() {
-    bool isAwaitingConsent = message.consentModel?.name == 'Affirmative Consent' &&
-                            message.additionalData?['requiresRecipientConsent'] == true;
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            message.consentModel?.name ?? 'Unknown Model',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+Widget _buildHeader() {
+  bool isAwaitingConsent = message.consentModel?.name == 'Affirmative Consent' &&
+                          message.additionalData?['requiresRecipientConsent'] == true;
+  
+  return Container(
+    margin: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: AppTheme.primaryColor.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3))
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          _getConsentModelIcon(),
+          size: 16,
+          color: AppTheme.primaryColor,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          message.consentModel?.name ?? 'Unknown Model',
+          style: TextStyle(
+            fontSize: 14, 
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor
           ),
-          if (isAwaitingConsent) ...[
-            const SizedBox(width: 8),
-            Icon(Icons.pending_outlined, size: 12, color: Colors.grey[600]),
-            Text(
-              ' Awaiting consent',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-          ],
+        ),
+        if (isAwaitingConsent) ...[
+          const SizedBox(width: 8),
+          Icon(Icons.pending_outlined, size: 14, color: Colors.orange),
+          Text(
+            ' Awaiting consent',
+            style: TextStyle(fontSize: 12, color: Colors.orange[700]),
+          ),
         ],
-      ),
-    );
+      ],
+    ),
+  );
+}
+
+// Add this helper method to get an appropriate icon for each consent model
+IconData _getConsentModelIcon() {
+  switch (message.consentModel?.name) {
+    case 'Informed Consent':
+      return Icons.info_outline;
+    case 'Affirmative Consent':
+      return Icons.check_circle_outline;
+    case 'Dynamic Consent':
+      return Icons.update_outlined;  
+    case 'Granular Consent':
+      return Icons.tune_outlined;
+    case 'Implied Consent':
+      return Icons.psychology_outlined;
+    default:
+      return Icons.help_outline;
   }
+}
 
   /// Builds the content of the message bubble, which displays the image and the controls.
   Widget _buildContent(BuildContext context) {
