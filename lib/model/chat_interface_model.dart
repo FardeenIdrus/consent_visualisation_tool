@@ -96,12 +96,17 @@ Future<void> _checkDynamicConsent() async {
             context: context,
             barrierDismissible: false,
             useRootNavigator: true,
-            builder: (dialogContext) => _DynamicConsentReassessmentDialog(),
+            builder: (dialogContext) => _DynamicConsentReassessmentDialog(
+              totalSeconds: totalSeconds,
+            ),
           );
 
           if (result != null) {
             if (result['continue'] == true) {
+              // Immediately update the last consent time to NOW
               message.additionalData!['lastConsentTime'] = now.toIso8601String();
+              
+              // If a new total seconds is provided, update it
               if (result.containsKey('newTotalSeconds')) {
                 message.additionalData!['totalSeconds'] = result['newTotalSeconds'];
               }
@@ -157,6 +162,10 @@ Future<void> _checkDynamicConsent() async {
 }
 
 class _DynamicConsentReassessmentDialog extends StatefulWidget {
+  final int totalSeconds;
+
+  const _DynamicConsentReassessmentDialog({required this.totalSeconds});
+
   @override
   _DynamicConsentReassessmentDialogState createState() =>
       _DynamicConsentReassessmentDialogState();
@@ -164,9 +173,23 @@ class _DynamicConsentReassessmentDialog extends StatefulWidget {
 
 class _DynamicConsentReassessmentDialogState
     extends State<_DynamicConsentReassessmentDialog> {
-  final TextEditingController _hoursController = TextEditingController(text: '0');
-  final TextEditingController _minutesController = TextEditingController(text: '0');
-  final TextEditingController _secondsController = TextEditingController(text: '0');
+  late TextEditingController _hoursController;
+  late TextEditingController _minutesController;
+  late TextEditingController _secondsController;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Calculate hours, minutes, and seconds from total seconds
+    final hours = widget.totalSeconds ~/ 3600;
+    final minutes = (widget.totalSeconds % 3600) ~/ 60;
+    final seconds = widget.totalSeconds % 60;
+
+    _hoursController = TextEditingController(text: hours.toString());
+    _minutesController = TextEditingController(text: minutes.toString());
+    _secondsController = TextEditingController(text: seconds.toString());
+  }
 
   @override
   void dispose() {

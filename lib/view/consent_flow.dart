@@ -163,11 +163,13 @@ class StepCard extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.chevron_right,
-                          size: 20,
-                          color: AppTheme.primaryColor,
-                        ),
+                        Text(
+  "•", // Unicode bullet point
+  style: TextStyle(
+    fontSize: 14,
+    color: AppTheme.primaryColor,
+  ),
+),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
