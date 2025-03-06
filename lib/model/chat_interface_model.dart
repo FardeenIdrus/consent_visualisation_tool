@@ -103,11 +103,12 @@ Future<void> _checkDynamicConsent() async {
 
           if (result != null) {
             if (result['continue'] == true) {
-              // Immediately update the last consent time to NOW
-              message.additionalData!['lastConsentTime'] = now.toIso8601String();
+              // Use the moment of user confirmation as the new last consent time
+              final confirmationTime = DateTime.now();
+              message.additionalData!['lastConsentTime'] = confirmationTime.toIso8601String();
               
               // If a new total seconds is provided, update it
-              if (result.containsKey('newTotalSeconds')) {
+              if (result.containsKey('newTotalSeconds') && result['newTotalSeconds'] != null) {
                 message.additionalData!['totalSeconds'] = result['newTotalSeconds'];
               }
             } else {
