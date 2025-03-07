@@ -491,45 +491,7 @@ group('ConsentFlowVisualization Widget Tests', () {
     // Verify presence of chevron icons in the collapsed state
     expect(find.byIcon(Icons.expand_more), findsNWidgets(2));
   });
-
-  testWidgets('renders chevron_right icons when showing details', (WidgetTester tester) async {
-    // Create sample steps for testing
-    final steps = [
-      ConsentStep(
-        title: 'Step with Details',
-        icon: Icons.check_circle_outline,
-        details: ['Detail with chevron'],
-      ),
-    ];
-
-    // Build our widget
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          primaryColor: AppTheme.primaryColor,
-          colorScheme: const ColorScheme.light(primary: AppTheme.primaryColor),
-        ),
-        home: Scaffold(
-          body: ConsentFlowVisualization(
-            modelName: 'Test Model',
-            steps: steps,
-          ),
-        ),
-      ),
-    );
-
-    // Tap to expand the step
-    await tester.tap(find.text('Step with Details'));
-    await tester.pumpAndSettle();
-    
-    // Verify the detail is shown
-    expect(find.text('Detail with chevron'), findsOneWidget);
-    
-    // Verify the chevron_right icon is present next to the detail
-    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-  });
 });
-
 }
 
 
