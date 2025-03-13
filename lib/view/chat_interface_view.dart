@@ -362,7 +362,8 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
       ),
       
       // Image request button for recipient (not for sender or recipient 2)
-      if (!isSender && !isRecipient2 && _model.currentModel?.name == 'Affirmative Consent')
+      // if (!isSender && !isRecipient2 && _model.currentModel?.name == 'Affirmative Consent')
+      if (!isSender && !isRecipient2)
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton.icon(
