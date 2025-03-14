@@ -131,7 +131,7 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: const Text('Consent Simulation'),
+      title: const Text('Consent Model Simulation'),
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(48),
