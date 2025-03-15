@@ -275,7 +275,7 @@ class _InformedConsentDialogState extends State<InformedConsentDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: _allRisksAcknowledged() ? Colors.deepPurple : Colors.grey,
           ),
-          child: const Text('I Understand All Risks'),
+          child: const Text('I Understand All Risks and wish to send the image'),
         ),
       ],
     );

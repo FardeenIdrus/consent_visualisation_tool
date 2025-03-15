@@ -275,7 +275,7 @@ void main() {
       
       // Verify buttons
       expect(find.text('Cancel'), findsOneWidget);
-      expect(find.text('I Understand All Risks'), findsOneWidget);
+      expect(find.text('I Understand All Risks and wish to send the image'), findsOneWidget);
     });
     
     // Replace test 3.3 with this improved version
@@ -308,7 +308,7 @@ testWidgets('3.3 Informed Consent Dialog Interaction', (WidgetTester tester) asy
   await tester.pumpAndSettle();
   
   // Find the 'I Understand All Risks' button
-  final continueButtonFinder = find.text('I Understand All Risks');
+  final continueButtonFinder = find.text('I Understand All Risks and wish to send the image');
   
   // Initially, the button should be disabled
   final ElevatedButton continueButton = tester.widget(find.ancestor(
@@ -402,11 +402,11 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
   }
   
   // Make sure the button is enabled and visible
-  await tester.ensureVisible(find.text('I Understand All Risks'));
+  await tester.ensureVisible(find.text('I Understand All Risks and wish to send the image'));
   await tester.pumpAndSettle();
   
   // Tap the 'I Understand All Risks' button
-  await tester.tap(find.text('I Understand All Risks'));
+  await tester.tap(find.text('I Understand All Risks and wish to send the image'));
   await tester.pumpAndSettle();
   
   // Verify dialog is dismissed
