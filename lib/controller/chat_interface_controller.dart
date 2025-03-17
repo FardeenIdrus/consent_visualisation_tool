@@ -2,13 +2,17 @@ import 'dart:typed_data';
 import 'package:consent_visualisation_tool/model/chat_interface_model.dart';
 import 'package:flutter/material.dart';
 
-
+/// Controller for handling user interactions with the chat simulation interface.
+/// Manages consent processes, message creation, and updates to existing messages.
 class SimulationController {
   final SimulationModel model;
   final BuildContext context;
 
   SimulationController(this.model, this.context);
 
+/// Updates settings for an existing message, typically used for modifying granular consent settings.
+/// @param message The message whose settings need to be updated
+/// @param newSettings Map of new settings to be applied to the message
 void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSettings) {
   if (message.additionalData != null) {
     message.additionalData!.addAll(newSettings);
@@ -16,7 +20,12 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
   }
 }
 
-
+/// Handles the sending of messages with appropriate consent model interactions.
+/// Creates a model-specific consent dialog based on the current consent model.
+/// @param text Optional text content of the message
+/// @param imageBytes Optional image content of the message
+/// @param recipientRequested Whether this message is being sent in response to a recipient request
+/// @return Whether the message was successfully sent
   Future<bool> sendMessage(String? text, {Uint8List? imageBytes, bool recipientRequested = false}) async {
     if (model.currentModel == null) return false;
 
@@ -84,7 +93,10 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
         return false;
     }
   }
-
+/// Deletes a message after confirming with the user.
+/// Only works for models that allow deletion.
+/// @param message The message to be deleted
+/// @return Whether the message was successfully deleted
 Future<bool> deleteMessage(SimulationMessage message) async {
     if (message.additionalData?['allowDeletion'] == true) {
       final confirmed = await showDialog<bool>(
@@ -114,6 +126,12 @@ Future<bool> deleteMessage(SimulationMessage message) async {
     return false;
   }
 
+  
+/// Adds a new message to the chat interface.
+/// @param text Text content of the message
+/// @param imageBytes Image content of the message
+/// @param additionalData Additional metadata for the message, including consent settings
+/// @return Whether the message was successfully added
   bool _addMessage(String? text, Uint8List? imageBytes, {Map<String, dynamic>? additionalData}) {
     final message = SimulationMessage(
       content: text ?? '',

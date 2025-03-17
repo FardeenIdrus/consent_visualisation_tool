@@ -8,8 +8,6 @@ class CompareScreenModel {
   final List<ConsentModel> consentModels = ConsentModelList.getAvailableModels();
   
   // Returns a map describing the initial consent process for a given model.
-// Updated getInitialConsentProcess for Informed Consent and Affirmative Consent
-// in compare_model.dart
 
 Map<String, dynamic> getInitialConsentProcess(ConsentModel model) {
   switch (model.name) {

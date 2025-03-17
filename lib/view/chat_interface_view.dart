@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import 'package:collection/collection.dart';
 
+
+/// Main screen for simulating different consent models in a chat interface
 class SimulationScreen extends StatefulWidget {
   const SimulationScreen({super.key});
 
@@ -54,6 +56,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     super.dispose();
   }
 
+/// Shows confirmation dialog before clearing all messages
   void _clearChat() {
     showDialog(
       context: context,
@@ -84,6 +87,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     );
   }
 
+/// Opens image picker to select an image for sharing
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -132,6 +136,7 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
     );
   }
 
+/// Builds the app bar with tabs for different user roles
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: const Text('Consent Model Simulation'),
@@ -159,6 +164,8 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
     );
   }
 
+ /// Builds a tab button with special handling for sender tab switches
+  /// When switching to sender tab, triggers consent reassessment check
 Widget _buildTabButton(String text, int index) {
   final isSelected = _currentTabIndex == index;
   return Expanded(
@@ -204,6 +211,7 @@ Widget _buildTabButton(String text, int index) {
   );
 }
 
+/// Builds the consent model selector dropdown
   Widget _buildConsentModelSelector() {
     final models = ConsentModelList.getAvailableModels();
     return Container(
@@ -261,7 +269,8 @@ Widget _buildTabButton(String text, int index) {
     );
   }
 
-// Fix for the Affirmative Consent dialog issue
+/// Builds the chat view for a specific role (sender, recipient, or third party)
+  /// Handles message display, image requests, and appropriate controls
 Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
   return Column(
     children: [
@@ -376,9 +385,6 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
           },
         ),
       ),
-      
-      // Image request button for recipient (not for sender or recipient 2)
-      // if (!isSender && !isRecipient2 && _model.currentModel?.name == 'Affirmative Consent')
       if (!isSender && !isRecipient2)
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -437,6 +443,7 @@ Widget _buildChatView({required bool isSender, bool isRecipient2 = false}) {
   );
 }
 
+/// Shows animation feedback when an image is saved or forwarded
 void _showActionAnimation(BuildContext context, String action) {
   OverlayEntry overlayEntry = OverlayEntry(
     builder: (context) => Center(

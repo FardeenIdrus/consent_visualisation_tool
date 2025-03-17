@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Consent Models Educational Platform',
-      theme: AppTheme.lightTheme(), // Use the theme here
+      theme: AppTheme.lightTheme(),
       home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
     );

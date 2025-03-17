@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
+/// Visualises consent model features as an expandable step-by-step flow
 class ConsentFlowVisualization extends StatefulWidget {
   final String modelName;
   final List<ConsentStep> steps;
@@ -17,13 +18,14 @@ class ConsentFlowVisualization extends StatefulWidget {
 }
 
 class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
-  int? expandedStepIndex;
+  int? expandedStepIndex; // Tracks which step is currently expanded, null if none
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Display the model name as a header
         Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
           child: Text(
@@ -35,6 +37,7 @@ class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
             ),
           ),
         ),
+         // Display steps vertically with connector lines between them
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -46,9 +49,11 @@ class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
                   step: widget.steps[index],
                   isExpanded: expandedStepIndex == index,
                   onTap: () => setState(() {
+                    // Toggle expansion of the tapped step
                     expandedStepIndex = expandedStepIndex == index ? null : index;
                   }),
                 ),
+                // Add connector line between steps, except after the last step
                 if (index < widget.steps.length - 1)
                   const ConnectorLine(),
               ],
@@ -60,6 +65,7 @@ class _ConsentFlowVisualizationState extends State<ConsentFlowVisualization> {
   }
 }
 
+/// Visual connector between step cards to represent flow/sequence
 class ConnectorLine extends StatelessWidget {
   const ConnectorLine({super.key});
 
@@ -84,6 +90,7 @@ class ConnectorLine extends StatelessWidget {
   }
 }
 
+/// Individual expandable card representing a consent model feature or step
 class StepCard extends StatelessWidget {
   final ConsentStep step;
   final bool isExpanded;
@@ -163,13 +170,13 @@ class StepCard extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-  "•", // Unicode bullet point
-  style: TextStyle(
-    fontSize: 14,
-    color: AppTheme.primaryColor,
-  ),
-),
+                        const Text(
+                              "•", // Unicode bullet point
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(

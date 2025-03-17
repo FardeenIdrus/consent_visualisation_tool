@@ -5,6 +5,7 @@ import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:consent_visualisation_tool/view/chat_interface_view.dart';
 import '../theme/app_theme.dart';
 
+/// Screen for comparing different consent models across key dimensions
 class CompareScreen extends StatefulWidget {
   const CompareScreen({super.key});
 
@@ -18,7 +19,10 @@ class _CompareScreenState extends State<CompareScreen> {
   // Local tracking of the selected dimension. This is kept in sync with the controller.
   String selectedDimension = 'initial';
 
-  // Dimension metadata.
+  // Defines the three key dimensions used to compare consent models:
+  /// - Initial Consent Process: How consent is first established
+  /// - Permission Granularity: Technical controls at sharing time
+  /// - Modification & Revocation: Post-sharing control options
   final Map<String, Map<String, Object>> dimensions = {
     'initial': {
       'title': 'Initial Consent Process',
@@ -39,6 +43,7 @@ class _CompareScreenState extends State<CompareScreen> {
 
   @override
   void initState() {
+    // Set up listeners to sync UI with controller state changes
     super.initState();
     controller.selectedModels.addListener(() {
       setState(() {});
@@ -66,6 +71,8 @@ class _CompareScreenState extends State<CompareScreen> {
     return _buildStandardSteps(modelData);
   }
 
+  /// Creates a two-pathway consent flow for models that offer distinct consent flows
+  /// sender-initiated vs. recipient-requested for Affirmative Consent
   List<ConsentStep> _buildPathwaySteps(Map<String, dynamic> modelData) {
     return [
       ConsentStep(
@@ -80,6 +87,8 @@ class _CompareScreenState extends State<CompareScreen> {
       ),
     ];
   }
+
+// Creates a standard visualisation showing Primary Features, Capabilities, and Key Implications of a consent model
 
 List<ConsentStep> _buildStandardSteps(Map<String, dynamic> modelData) {
   List<ConsentStep> steps = [];

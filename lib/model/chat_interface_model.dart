@@ -2,6 +2,9 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:consent_visualisation_tool/model/consent_models.dart';
 import 'package:flutter/material.dart';
+
+/// Represents a message within the chat simulation.
+/// Contains content, metadata, and consent-related information.
 class SimulationMessage {
   final String content;
   final MessageType type;
@@ -21,8 +24,11 @@ class SimulationMessage {
   }) : timestamp = DateTime.now();
 }
 
+/// Defines the types of messages that can be exchanged in the simulation.
 enum MessageType { text, image }
 
+/// Model that manages the state of the chat simulation.
+/// Handles messages, consent reassessment, and expiry timers.
 class SimulationModel {
   List<SimulationMessage> messages = [];
   ConsentModel? currentModel;
@@ -33,9 +39,10 @@ class SimulationModel {
   List<SimulationMessage> forwardedMessages = [];
   final Function isSenderActive;
 
-// Update your constructor
+  /// Creates a new SimulationModel with the given context and tab state function.
+  /// @param context The BuildContext for showing dialogs
+  /// @param isSenderActive Function that returns true when on the sender tab
 SimulationModel(this.context, this.isSenderActive) {
-  // Your existing initialization code
 
     // Check every second for both expired messages and consent re-evaluation
     _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -44,19 +51,22 @@ SimulationModel(this.context, this.isSenderActive) {
     });
 }
 
+/// Adds a message to the forwarded messages list to simulate sharing with a third party.
 void addForwardedMessage(SimulationMessage message) {
     forwardedMessages.add(message);
     // Notify listeners that a new message has been forwarded
     _messageController.add(messages);
   }
 
-
+  /// Stream of messages that listeners can subscribe to for updates.
   Stream<List<SimulationMessage>> get messageStream => _messageController.stream;
 
+/// Notifies listeners that the message data has changed.
    void notifyListeners() {
     _messageController.add(messages);
   }
 
+ /// Checks for and removes messages that have expired due to time limits.
   void _checkExpiredMessages() {
     bool hasExpired = false;
     final now = DateTime.now();
@@ -78,10 +88,17 @@ void addForwardedMessage(SimulationMessage message) {
     }
   }
 
+/// Public method to trigger a dynamic consent check manually.
+/// Used when switching tabs to ensure proper consent state.
  void checkDynamicConsent() {
     _checkDynamicConsent();
   }
 
+  /// Checks for messages that need consent reassessment and handles dialog display.
+  /// When consent reassessment time has elapsed:
+  /// 1. Hides the image for recipients
+  /// 2. Shows a reassessment dialog to the sender (if on sender tab)
+  /// 3. Updates visibility based on sender's decision
 Future<void> _checkDynamicConsent() async {
   if (_isShowingDialog) return;
   
@@ -153,27 +170,26 @@ Future<void> _checkDynamicConsent() async {
 }
 
 
-
+ /// Adds a new message to the chat and notifies listeners.
   void addMessage(SimulationMessage message) {
     messages.add(message);
     _messageController.add(messages);
   }
 
-  // In simulation_model.dart, add this method to the SimulationModel class:
-
-// In simulation_model.dart add:
-
+/// Removes a message from the chat and notifies listeners.
   void deleteMessage(SimulationMessage message) {
     messages.remove(message);
     _messageController.add(messages);
   }
 
+/// Clears all messages from the simulation including forwarded messages.
  void clearMessages() {
     messages.clear();
     forwardedMessages.clear(); // Clear forwarded messages as well
     _messageController.add(messages);
   }
 
+ /// Releases resources when the model is no longer needed.
   void dispose() {
     _expiryTimer?.cancel();
     _messageController.close();
@@ -182,6 +198,8 @@ Future<void> _checkDynamicConsent() async {
   
 }
 
+/// Dialog displayed when dynamic consent requires reassessment.
+/// Allows the user to continue sharing or revoke consent.
 class _DynamicConsentReassessmentDialog extends StatefulWidget {
   final int totalSeconds;
 
