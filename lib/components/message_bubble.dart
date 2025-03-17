@@ -113,7 +113,7 @@ Widget _buildHeader() {
   );
 }
 
-// Add this helper method to get an appropriate icon for each consent model
+
 IconData _getConsentModelIcon() {
   switch (message.consentModel?.name) {
     case 'Informed Consent':
