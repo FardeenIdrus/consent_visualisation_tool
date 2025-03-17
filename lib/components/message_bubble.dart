@@ -94,7 +94,7 @@ Widget _buildHeader() {
         const SizedBox(width: 6),
         Text(
           message.consentModel?.name ?? 'Unknown Model',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14, 
             fontWeight: FontWeight.bold,
             color: AppTheme.primaryColor
@@ -102,7 +102,7 @@ Widget _buildHeader() {
         ),
         if (isAwaitingConsent) ...[
           const SizedBox(width: 8),
-          Icon(Icons.pending_outlined, size: 14, color: Colors.orange),
+          const Icon(Icons.pending_outlined, size: 14, color: Colors.orange),
           Text(
             ' Awaiting consent',
             style: TextStyle(fontSize: 12, color: Colors.orange[700]),
