@@ -132,136 +132,180 @@ IconData _getConsentModelIcon() {
 }
 
   /// Builds the content of the message bubble, which displays the image and the controls.
-  Widget _buildContent(BuildContext context) {
-    if (message.type == MessageType.image) {
-      bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
-      bool canDelete = message.additionalData?['allowDeletion'] == true;
-      List<Widget> controls = [];
-      String timeRemaining = '';
-      bool isExpired = false;
-
-      if (!isReceiver && message.consentModel?.name == 'Granular Consent') {
-        controls.add(
-          _buildActionButton(
-            icon: Icons.settings,
-            enabled: true,
-            onPressed: () => _showGranularSettings(context),
-            label: 'Settings',
-          ),
-        );
-      }
-
-      if (message.consentModel?.name == 'Granular Consent' && 
-          message.additionalData?['timeLimit'] == true) {
-        final minutes = message.additionalData!['timeLimitMinutes'] as int;
-        final expiryTime = message.timestamp.add(Duration(minutes: minutes));
-        final remaining = expiryTime.difference(DateTime.now());
-        
-        if (remaining.isNegative) {
-          timeRemaining = 'Expired';
-          isExpired = true;
-        } else {
-          timeRemaining = '${remaining.inSeconds}';
-        }
-      }
-
+Widget _buildContent(BuildContext context) {
+  if (message.type == MessageType.image) {
+    // Check visibility for Dynamic Consent - only hide for recipient, not sender
+    bool isDynamicConsent = message.consentModel?.name == 'Dynamic Consent';
+    bool isInReassessment = message.additionalData?['isVisible'] == false;
+    bool shouldHideImage = isReceiver && isDynamicConsent && isInReassessment;
+    
+    // For recipient: show placeholder during reassessment
+    if (shouldHideImage) {
       return Container(
-        constraints: const BoxConstraints(maxWidth: 240),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.memory(
-                message.imageData!,
-                width: 240,
-                height: 320,
-                fit: BoxFit.cover,
-              ),
-            ),
-            if (timeRemaining.isNotEmpty && !isReceiver)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    timeRemaining,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-             if (controls.isNotEmpty || isReceiver || (isDynamicConsent && !isReceiver))
-      Positioned(
-        bottom: 8,
-        right: 8,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...controls,
-            if (isDynamicConsent && !isReceiver && canDelete)
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                child: _buildActionButton(
-                  icon: Icons.delete_outline,
-                  enabled: true,
-                  onPressed: () => onDelete?.call(context),
-                  label: 'Delete',
-                ),
-              ),
-            if (isReceiver && !isRecipient2) ...[
-              // Save and forward buttons only for first recipient, not Recipient 2
-              if (canSave)
-                Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: _buildActionButton(
-                    icon: Icons.save_rounded,
-                    enabled: true,
-                    onPressed: () => onSave(context),
-                    label: 'Save',
-                  ),
-                ),
-              if (canForward)
-                _buildActionButton(
-                  icon: Icons.forward_rounded,
-                  enabled: true,
-                  onPressed: () => onForward(context),
-                  label: 'Forward',
-                ),
-            ] else if (isReceiver && isRecipient2) ...[
-              
-            ],
-          ],
+        constraints: const BoxConstraints(maxWidth: 240, maxHeight: 320),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(16),
         ),
-      ),
-          ],
+        child: Center(
+          child: Icon(
+            Icons.hourglass_top,
+            size: 48, 
+            color: Colors.grey[500],
+          ),
+        ),
+      );
+    }
+    
+    // Variables for controls and timer
+    bool canDelete = message.additionalData?['allowDeletion'] == true;
+    List<Widget> controls = [];
+    String timeRemaining = '';
+    bool isExpired = false;
+
+    if (!isReceiver && message.consentModel?.name == 'Granular Consent') {
+      controls.add(
+        _buildActionButton(
+          icon: Icons.settings,
+          enabled: true,
+          onPressed: () => _showGranularSettings(context),
+          label: 'Settings',
         ),
       );
     }
 
+    if (message.consentModel?.name == 'Granular Consent' && 
+        message.additionalData?['timeLimit'] == true) {
+      final minutes = message.additionalData!['timeLimitMinutes'] as int;
+      final expiryTime = message.timestamp.add(Duration(minutes: minutes));
+      final remaining = expiryTime.difference(DateTime.now());
+      
+      if (remaining.isNegative) {
+        timeRemaining = 'Expired';
+        isExpired = true;
+      } else {
+        timeRemaining = '${remaining.inSeconds}';
+      }
+    }
+
     return Container(
-      constraints: const BoxConstraints(maxWidth: 280),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        message.content,
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 16,
-        ),
+      constraints: const BoxConstraints(maxWidth: 240),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.memory(
+              message.imageData!,
+              width: 240,
+              height: 320,
+              fit: BoxFit.cover,
+            ),
+          ),
+          if (timeRemaining.isNotEmpty && !isReceiver)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isExpired ? Colors.red.withOpacity(0.9) : Colors.black87,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  timeRemaining,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          if (controls.isNotEmpty || isReceiver || (isDynamicConsent && !isReceiver))
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...controls,
+                  if (isDynamicConsent && !isReceiver && canDelete)
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: _buildActionButton(
+                        icon: Icons.delete_outline,
+                        enabled: true,
+                        onPressed: () => onDelete?.call(context),
+                        label: 'Delete',
+                      ),
+                    ),
+                  if (isReceiver && !isRecipient2) ...[
+                    // Save and forward buttons only for first recipient, not Recipient 2
+                    if (canSave)
+                      Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        child: _buildActionButton(
+                          icon: Icons.save_rounded,
+                          enabled: true,
+                          onPressed: () => onSave(context),
+                          label: 'Save',
+                        ),
+                      ),
+                    if (canForward)
+                      _buildActionButton(
+                        icon: Icons.forward_rounded,
+                        enabled: true,
+                        onPressed: () => onForward(context),
+                        label: 'Forward',
+                      ),
+                  ] else if (isReceiver && isRecipient2) ...[
+                    
+                  ],
+                ],
+              ),
+            ),
+          // Add indicator for sender during reassessment
+          if (!isReceiver && isDynamicConsent && isInReassessment)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Text(
+                  'Reassessing',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
+
+  return Container(
+    constraints: const BoxConstraints(maxWidth: 280),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      color: isReceiver ? Colors.grey[100] : AppTheme.primaryColor.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Text(
+      message.content,
+      style: const TextStyle(
+        color: Colors.black87,
+        fontSize: 16,
+      ),
+    ),
+  );
+}
 
   /// Builds a consent request bubble that is displayed when the receiver is
   /// required to consent to receive an image.

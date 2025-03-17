@@ -31,14 +31,18 @@ class SimulationModel {
   final BuildContext context;
   bool _isShowingDialog = false;  // Add flag to prevent multiple dialogs
   List<SimulationMessage> forwardedMessages = [];
+  final Function isSenderActive;
 
-  SimulationModel(this.context) {
+// Update your constructor
+SimulationModel(this.context, this.isSenderActive) {
+  // Your existing initialization code
+
     // Check every second for both expired messages and consent re-evaluation
     _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _checkExpiredMessages();
       _checkDynamicConsent();
     });
-  }
+}
 
 void addForwardedMessage(SimulationMessage message) {
     forwardedMessages.add(message);
@@ -74,58 +78,74 @@ void addForwardedMessage(SimulationMessage message) {
     }
   }
 
+ void checkDynamicConsent() {
+    _checkDynamicConsent();
+  }
+
 Future<void> _checkDynamicConsent() async {
   if (_isShowingDialog) return;
-
+  
   final now = DateTime.now();
 
   for (var message in List<SimulationMessage>.from(messages)) {
     if (message.consentModel?.name == 'Dynamic Consent' &&
-        message.additionalData != null &&
-        message.additionalData!['isVisible'] == true) {
+        message.additionalData != null) {
       
       final lastConsentTime = DateTime.parse(message.additionalData!['lastConsentTime']);
       final totalSeconds = message.additionalData!['totalSeconds'] as int;
       final nextConsentTime = lastConsentTime.add(Duration(seconds: totalSeconds));
 
-      if (now.isAfter(nextConsentTime) && context.mounted && !_isShowingDialog) {
-        _isShowingDialog = true;
+      if (now.isAfter(nextConsentTime)) {
+        // If it's still marked as visible, update it to not visible
+        if (message.additionalData!['isVisible'] == true) {
+          message.additionalData!['isVisible'] = false;
+          _messageController.add(messages); // Notify listeners that visibility changed
+        }
+        
+        // Only show the dialog if on the sender tab
+        if (context.mounted && !_isShowingDialog && isSenderActive()) {
+          _isShowingDialog = true;
 
-        try {
-          final result = await showDialog<Map<String, dynamic>>(
-            context: context,
-            barrierDismissible: false,
-            useRootNavigator: true,
-            builder: (dialogContext) => _DynamicConsentReassessmentDialog(
-              totalSeconds: totalSeconds,
-            ),
-          );
+          try {
+            final result = await showDialog<Map<String, dynamic>>(
+              context: context,
+              barrierDismissible: false,
+              useRootNavigator: true,
+              builder: (dialogContext) => _DynamicConsentReassessmentDialog(
+                totalSeconds: totalSeconds,
+              ),
+            );
 
-          if (result != null) {
-            if (result['continue'] == true) {
-              // Use the moment of user confirmation as the new last consent time
-              final confirmationTime = DateTime.now();
-              message.additionalData!['lastConsentTime'] = confirmationTime.toIso8601String();
-              
-              // If a new total seconds is provided, update it
-              if (result.containsKey('newTotalSeconds') && result['newTotalSeconds'] != null) {
-                message.additionalData!['totalSeconds'] = result['newTotalSeconds'];
-              }
-            } else {
-              deleteMessage(message);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Image has been deleted'),
-                    backgroundColor: Colors.red,
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+            if (result != null) {
+              if (result['continue'] == true) {
+                // Use the moment of user confirmation as the new last consent time
+                final confirmationTime = DateTime.now();
+                message.additionalData!['lastConsentTime'] = confirmationTime.toIso8601String();
+                
+                // Make the image visible again since consent was continued
+                message.additionalData!['isVisible'] = true;
+                
+                // If a new total seconds is provided, update it
+                if (result.containsKey('newTotalSeconds') && result['newTotalSeconds'] != null) {
+                  message.additionalData!['totalSeconds'] = result['newTotalSeconds'];
+                }
+              } else {
+                deleteMessage(message);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Image has been deleted'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
               }
             }
+          } finally {
+            _isShowingDialog = false;
+            _messageController.add(messages); // Notify listeners of state change
           }
-        } finally {
-          _isShowingDialog = false;
         }
       }
     }

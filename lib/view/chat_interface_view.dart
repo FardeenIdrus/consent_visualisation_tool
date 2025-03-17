@@ -31,7 +31,10 @@ class _SimulationScreenState extends State<SimulationScreen> {
   @override
   void initState() {
     super.initState();
-    _model = SimulationModel(context);
+   _model = SimulationModel(
+    context,
+    () => _currentTabIndex == 0, // Returns true when sender tab is active
+  );
     _controller = SimulationController(_model, context);
     _model.currentModel = ConsentModelList.getAvailableModels().first;
 
@@ -156,37 +159,50 @@ Future<void> _handleSendMessage(String text, {bool recipientRequested = false}) 
     );
   }
 
-  Widget _buildTabButton(String text, int index) {
-    final isSelected = _currentTabIndex == index;
-    return Expanded(
-      child: InkWell(
-        onTap: () => _pageController.animateToPage(
+Widget _buildTabButton(String text, int index) {
+  final isSelected = _currentTabIndex == index;
+  return Expanded(
+    child: InkWell(
+      onTap: () {
+        _pageController.animateToPage(
           index,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: isSelected ? AppTheme.primaryColor : Colors.transparent,
-                width: 2,
-              ),
+        );
+        
+        // Check for reassessment needed when switching to sender tab
+        if (index == 0 && _currentTabIndex != 0) {
+          // Need to give time for state to update before checking
+          Future.delayed(const Duration(milliseconds: 350), () {
+            if (mounted) {
+              // Force a dynamic consent check
+              _model.checkDynamicConsent();
+            }
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+              width: 2,
             ),
           ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? AppTheme.primaryColor : Colors.grey,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isSelected ? AppTheme.primaryColor : Colors.grey,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildConsentModelSelector() {
     final models = ConsentModelList.getAvailableModels();
