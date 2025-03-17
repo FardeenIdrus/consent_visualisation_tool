@@ -1,4 +1,6 @@
 // test/chat_interface_view_test.dart
+import 'dart:async';
+
 import 'package:consent_visualisation_tool/controller/chat_interface_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -755,7 +757,6 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       expect(find.text('Set Consent Re-evaluation Interval'), findsNothing);
     });
   });
-  
   // Granular Consent Model Tests
   group('6. Granular Consent Model', () {
     testWidgets('6.1 Select Granular Consent Model', (WidgetTester tester) async {
@@ -858,7 +859,6 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       expect(slider, findsOneWidget);
       
       // Tap Apply Settings
-      // Tap Apply Settings
       await tester.tap(find.text('Apply Settings'));
       await tester.pumpAndSettle();
       
@@ -888,14 +888,13 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
                     context: context,
                     builder: (context) => GranularConsentDialog(
                       isModification: true,
-                      initialSettings: {
+                      initialSettings: const {
                         'allowSaving': true,
                         'allowForwarding': false,
                         'timeLimit': true,
                         'timeLimitMinutes': 30,
                       },
                       onSettingsUpdated: (newSettings) {
-                        // In a real app this would update the message
                       },
                     ),
                   );
@@ -1007,9 +1006,6 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
   });
   
 }
-
-
-
 // Helper method to directly test _showActionAnimation
 void _showActionAnimation(BuildContext context, String action) {
   OverlayEntry overlayEntry = OverlayEntry(

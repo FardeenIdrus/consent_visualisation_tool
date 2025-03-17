@@ -408,17 +408,10 @@ group('CompareView Widget Tests', () {
     expect(find.text('Choose Two Models'), findsOneWidget);
     expect(find.text('Select two consent models to explore their unique characteristics'), findsOneWidget);
   });
-
-  // New Test: Verify that when "Affirmative Consent" is selected (which uses pathways),
-  // the pathway steps are rendered by _buildPathwaySteps.
-
 });
 
-
-// Add this new group at the end of your existing test file
 group('ConsentFlowVisualization Widget Tests', () {
   testWidgets('renders all steps and allows expanding/collapsing', (WidgetTester tester) async {
-    // Create sample steps for testing
     final steps = [
       ConsentStep(
         title: 'Step 1',
@@ -431,8 +424,6 @@ group('ConsentFlowVisualization Widget Tests', () {
         details: ['Detail 3', 'Detail 4', 'Detail 5'],
       ),
     ];
-
-    // Build our widget
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
