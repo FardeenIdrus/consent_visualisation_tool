@@ -109,7 +109,7 @@ Widget _buildHeaderSection(BuildContext context) {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Consent Visualisation Tool', 
+          'Consent Model Tool', 
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
