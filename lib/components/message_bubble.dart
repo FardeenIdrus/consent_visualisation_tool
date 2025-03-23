@@ -174,19 +174,23 @@ Widget _buildContent(BuildContext context) {
       );
     }
 
-    if (message.consentModel?.name == 'Granular Consent' && 
-        message.additionalData?['timeLimit'] == true) {
-      final minutes = message.additionalData!['timeLimitMinutes'] as int;
-      final expiryTime = message.timestamp.add(Duration(minutes: minutes));
-      final remaining = expiryTime.difference(DateTime.now());
-      
-      if (remaining.isNegative) {
-        timeRemaining = 'Expired';
-        isExpired = true;
-      } else {
-        timeRemaining = '${remaining.inSeconds}';
-      }
-    }
+   if (message.consentModel?.name == 'Granular Consent' && 
+    message.additionalData?['timeLimit'] == true) {
+  final minutes = message.additionalData!['timeLimitMinutes'] as int;
+  final seconds = message.additionalData!['timeLimitSeconds'] as int? ?? 0;
+  final totalSeconds = (minutes * 60) + seconds;
+  final expiryTime = message.timestamp.add(Duration(seconds: totalSeconds));
+  final remaining = expiryTime.difference(DateTime.now());
+  
+  if (remaining.isNegative) {
+    timeRemaining = 'Expired';
+    isExpired = true;
+  } else {
+    final mins = remaining.inMinutes;
+    final secs = remaining.inSeconds % 60;
+    timeRemaining = '${mins}m ${secs}s';
+  }
+}
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 240),

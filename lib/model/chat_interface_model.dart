@@ -67,26 +67,32 @@ void addForwardedMessage(SimulationMessage message) {
   }
 
  /// Checks for and removes messages that have expired due to time limits.
-  void _checkExpiredMessages() {
-    bool hasExpired = false;
-    final now = DateTime.now();
-    
-    messages.removeWhere((message) {
-      if (message.consentModel?.name == 'Granular Consent' &&
-          message.additionalData?['timeLimit'] == true) {
-        final minutes = message.additionalData!['timeLimitMinutes'] as int;
-        final expiryTime = message.timestamp.add(Duration(minutes: minutes));
-        final isExpired = now.isAfter(expiryTime);
-        if (isExpired) hasExpired = true;
-        return isExpired;
-      }
-      return false;
-    });
-
-    if (hasExpired) {
-      _messageController.add(messages);
+void _checkExpiredMessages() {
+  bool hasExpired = false;
+  final now = DateTime.now();
+  
+  messages.removeWhere((message) {
+    if (message.consentModel?.name == 'Granular Consent' &&
+        message.additionalData?['timeLimit'] == true) {
+      final minutes = message.additionalData!['timeLimitMinutes'] as int? ?? 0;
+      final seconds = message.additionalData!['timeLimitSeconds'] as int? ?? 0;
+      
+      // Ensure at least 1 second total duration
+      int totalSeconds = (minutes * 60) + seconds;
+      if (totalSeconds <= 0) totalSeconds = 1;
+      
+      final expiryTime = message.timestamp.add(Duration(seconds: totalSeconds));
+      final isExpired = now.isAfter(expiryTime);
+      if (isExpired) hasExpired = true;
+      return isExpired;
     }
+    return false;
+  });
+
+  if (hasExpired) {
+    _messageController.add(messages);
   }
+}
 
 /// Public method to trigger a dynamic consent check manually.
 /// Used when switching tabs to ensure proper consent state.

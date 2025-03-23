@@ -741,9 +741,8 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
       'allowSaving': false,
       'allowForwarding': false,
       'timeLimit': false,
-      'timeLimitMinutes': 60,
-      'allowScreenshots': false,
-      'addWatermark': false,
+      'timeLimitMinutes': 1,
+      'timeLimitSeconds': 0,
       'viewingDuration': false,
       'viewingDurationMinutes': 5,
     };
@@ -793,33 +792,70 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
               onChanged: (value) => setState(() => settings['timeLimit'] = value),
             ),
             if (settings['timeLimit'])
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Access duration (minutes):'),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Slider(
-                            value: settings['timeLimitMinutes'].toDouble(),
-                            min: 1,
-                            max: 180,
-                            divisions: 179,
-                            label: '${settings['timeLimitMinutes']} min',
-                            onChanged: (value) {
-                              setState(() => settings['timeLimitMinutes'] = value.round());
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('${settings['timeLimitMinutes']}m'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+  Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Access duration:'),
+        
+        // Minutes slider
+        // Minutes slider
+Row(
+  children: [
+    const Text('Minutes:'),
+    Expanded(
+      child: Slider(
+        value: settings['timeLimitMinutes'].toDouble(),
+        min: 0, // Allow 0 minutes
+        max: 180,
+        divisions: 180,
+        label: '${settings['timeLimitMinutes']} min',
+        onChanged: (value) {
+          setState(() {
+            settings['timeLimitMinutes'] = value.round();
+            // If both minutes and seconds are 0, set seconds to at least 1
+            if (settings['timeLimitMinutes'] == 0 && settings['timeLimitSeconds'] == 0) {
+              settings['timeLimitSeconds'] = 1;
+            }
+          });
+        },
+      ),
+    ),
+    const SizedBox(width: 8),
+    Text('${settings['timeLimitMinutes']}m'),
+  ],
+),
+
+// Seconds slider
+Row(
+  children: [
+    const Text('Seconds:'),
+    Expanded(
+      child: Slider(
+        value: settings['timeLimitSeconds'].toDouble(),
+        min: 0, // Allow 0 seconds
+        max: 59,
+        divisions: 59,
+        label: '${settings['timeLimitSeconds']} sec',
+        onChanged: (value) {
+          setState(() {
+            settings['timeLimitSeconds'] = value.round();
+            // If both minutes and seconds are 0, set seconds to at least 1
+            if (settings['timeLimitMinutes'] == 0 && settings['timeLimitSeconds'] == 0) {
+              settings['timeLimitSeconds'] = 1;
+            }
+          });
+        },
+      ),
+    ),
+    const SizedBox(width: 8),
+    Text('${settings['timeLimitSeconds']}s'),
+  ],
+),
+      ],
+    ),
+  ),
           ],
         ),
       ),
@@ -828,17 +864,24 @@ class _GranularConsentDialogState extends State<GranularConsentDialog> {
           onPressed: () => Navigator.of(context).pop(), // Just close without calling onSettingsUpdated
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            if (widget.isModification) {
-              widget.onSettingsUpdated?.call(settings);
-              Navigator.of(context).pop();
-            } else {
-              Navigator.of(context).pop(settings);
-            }
-          },
-          child: Text(widget.isModification ? 'Update Settings' : 'Apply Settings'),
-        ),
+      ElevatedButton(
+  onPressed: () {
+    // Ensure at least 1 second total duration
+    if (settings['timeLimit'] && 
+        settings['timeLimitMinutes'] == 0 && 
+        settings['timeLimitSeconds'] == 0) {
+      settings['timeLimitSeconds'] = 1;
+    }
+    
+    if (widget.isModification) {
+      widget.onSettingsUpdated?.call(settings);
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pop(settings);
+    }
+  },
+  child: Text(widget.isModification ? 'Update Settings' : 'Apply Settings'),
+),
       ],
     );
   }

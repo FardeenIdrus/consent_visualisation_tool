@@ -852,11 +852,11 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       await tester.pumpAndSettle();
       
       // Time limit slider should appear
-      expect(find.text('Access duration (minutes):'), findsOneWidget);
+      expect(find.text('Access duration:'), findsOneWidget);
       
       // Find slider
       final slider = find.byType(Slider);
-      expect(slider, findsOneWidget);
+      expect(slider, findsWidgets);
       
       // Tap Apply Settings
       await tester.tap(find.text('Apply Settings'));
@@ -893,6 +893,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
                         'allowForwarding': false,
                         'timeLimit': true,
                         'timeLimitMinutes': 30,
+                        'timeLimitSeconds': 0,
                       },
                       onSettingsUpdated: (newSettings) {
                       },
