@@ -41,10 +41,6 @@ class MockImagePicker extends Mock implements ImagePicker {
   }
 }
 
-// Create a testable version of SimulationScreen with ImagePicker accessible for testing
-// For TestableSimulationScreen, replace the existing implementation with this:
-
-
 // Wrapper for providing required contexts
 Widget createTestableWidget(Widget child) {
   return MaterialApp(
@@ -280,7 +276,6 @@ void main() {
       expect(find.text('I Understand All Risks and wish to send the image'), findsOneWidget);
     });
     
-    // Replace test 3.3 with this improved version
 testWidgets('3.3 Informed Consent Dialog Interaction', (WidgetTester tester) async {
   // Set a larger screen size to make all items visible
   tester.binding.window.physicalSizeTestValue = const Size(1024, 1600);
@@ -317,11 +312,11 @@ testWidgets('3.3 Informed Consent Dialog Interaction', (WidgetTester tester) asy
     of: continueButtonFinder,
     matching: find.byType(ElevatedButton),
   ));
-  expect(continueButton.onPressed, isNull); // Null onPressed means disabled
+  expect(continueButton.onPressed, isNull); 
   
   // Find all CheckboxListTile widgets
   final checkboxes = find.byType(CheckboxListTile);
-  expect(checkboxes, findsNWidgets(5)); // We expect 5 risk items
+  expect(checkboxes, findsNWidgets(5)); // Expectthe 5 risk items
   
   // Tap each checkbox one by one, with pumping in between to ensure UI updates
   for (int i = 0; i < 5; i++) {
@@ -339,20 +334,18 @@ testWidgets('3.3 Informed Consent Dialog Interaction', (WidgetTester tester) asy
     of: continueButtonFinder,
     matching: find.byType(ElevatedButton),
   ));
-  expect(buttonAfterAllChecks.onPressed, isNotNull); // Not null onPressed means enabled
+  expect(buttonAfterAllChecks.onPressed, isNotNull); 
   
   // Reset the screen size after the test
   addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
   addTearDown(tester.binding.window.clearDevicePixelRatioTestValue);
 });
 
-// Replace test 3.4 with this improved version
 testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) async {
   // Set a larger screen size to make all items visible
   tester.binding.window.physicalSizeTestValue = const Size(1024, 1600);
   tester.binding.window.devicePixelRatioTestValue = 1.0;
   
-  // Build the dialog directly
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -643,7 +636,6 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       expect(find.text('Image Request'), findsNothing);
       
       // Test the Share Image path
-      // This requires mocking ImagePicker which we've done above
     });
   });
   
@@ -925,6 +917,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       await tester.tap(find.text('Allow Saving'));
       await tester.pumpAndSettle();
       
+      
       // Verify update button text
       expect(find.text('Update Settings'), findsOneWidget);
       
@@ -946,7 +939,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () {
-                  // Call the target method directly
+                
                   _showActionAnimation(context, 'save');
                 },
                 child: const Text('Show Save Animation'),
@@ -964,9 +957,9 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       expect(find.text('Image saved!'), findsOneWidget);
       
       // Let the animation complete (1 second)
-      await tester.pump(const Duration(milliseconds: 500)); // Animation mid-point
-      await tester.pump(const Duration(milliseconds: 500)); // Animation complete
-      await tester.pump(const Duration(seconds: 1)); // Overlay removed
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500)); 
+      await tester.pump(const Duration(seconds: 1)); 
       
       // Animation should be gone
       expect(find.text('Image saved!'), findsNothing);
@@ -979,7 +972,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () {
-                  // Call the target method directly with 'forward'
+                
                   _showActionAnimation(context, 'forward');
                 },
                 child: const Text('Show Forward Animation'),
@@ -997,9 +990,9 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
       expect(find.text('Image forwarded!'), findsOneWidget);
       
       // Let the animation complete (1 second)
-      await tester.pump(const Duration(milliseconds: 500)); // Animation mid-point
-      await tester.pump(const Duration(milliseconds: 500)); // Animation complete
-      await tester.pump(const Duration(seconds: 1)); // Overlay removed
+      await tester.pump(const Duration(milliseconds: 500)); 
+      await tester.pump(const Duration(milliseconds: 500)); 
+      await tester.pump(const Duration(seconds: 1)); 
       
       // Animation should be gone
       expect(find.text('Image forwarded!'), findsNothing);
@@ -1007,7 +1000,7 @@ testWidgets('3.4 Informed Consent Dialog Button Actions', (WidgetTester tester) 
   });
   
 }
-// Helper method to directly test _showActionAnimation
+// Helper method to test _showActionAnimation
 void _showActionAnimation(BuildContext context, String action) {
   OverlayEntry overlayEntry = OverlayEntry(
     builder: (context) => Center(
@@ -1038,7 +1031,7 @@ void _showActionAnimation(BuildContext context, String action) {
                   children: [
                     Icon(
                       action == 'save' ? Icons.check_circle : Icons.forward,
-                      color: Colors.purple, // Using a different color for testing
+                      color: Colors.purple,
                       size: 48,
                     ),
                     const SizedBox(height: 16),
