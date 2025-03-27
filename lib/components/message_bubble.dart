@@ -43,7 +43,7 @@ class MessageBubble extends StatelessWidget {
         initialSettings: message.additionalData,
         isModification: true,
         onSettingsUpdated: (newSettings) {
-          controller.updateMessageSettings(message, newSettings);
+          controller.refreshMessageTimeLimit(message, newSettings);
         },
       ),
     );

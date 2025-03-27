@@ -20,6 +20,27 @@ void updateMessageSettings(SimulationMessage message, Map<String, dynamic> newSe
   }
 }
 
+void refreshMessageTimeLimit(SimulationMessage oldMessage, Map<String, dynamic> settings) {
+  if (oldMessage.consentModel?.name != 'Granular Consent') return;
+  
+  // Remove the old message from the model
+  model.deleteMessage(oldMessage);
+  
+  // Create a new message with identical content but new settings and timestamp
+  final newMessage = SimulationMessage(
+    content: oldMessage.content,
+    type: oldMessage.type,
+    imageData: oldMessage.imageData,
+    consentModel: oldMessage.consentModel,
+    additionalData: settings,  // Use the new settings directly
+  );
+  
+  // Add the new message to the model
+  model.addMessage(newMessage);
+  
+  print("Message replaced with new time limit: ${settings['timeLimitMinutes']}m ${settings['timeLimitSeconds']}s");
+}
+
 /// Handles the sending of messages with appropriate consent model interactions.
 /// Creates a model-specific consent dialog based on the current consent model.
 /// @param text Optional text content of the message
