@@ -1,6 +1,9 @@
+// Represents a consent model with a name.
+
 class ConsentModel {
   final String name;
 
+   // Constructor for creating a ConsentModel instance
   ConsentModel({required this.name});
 
   factory ConsentModel.granular() {
@@ -24,6 +27,7 @@ class ConsentModel {
   }
 }
 
+/// Utility class that provides a list of all available consent models.
 class ConsentModelList {
   static List<ConsentModel> getAvailableModels() {
     return [

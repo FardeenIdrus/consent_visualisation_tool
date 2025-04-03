@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 /// A widget that provides a chat input area with an optional image preview.
+/// 
+/// This widget consists of two main parts:
+/// 1. An image preview section that displays the selected image along with a button to remove it.
+/// 2. An input section where users can type their message, pick an image, and send the message.
 class ChatInput extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onImagePick;

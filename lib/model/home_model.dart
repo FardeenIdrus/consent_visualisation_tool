@@ -1,6 +1,7 @@
 // lib/model/home_model.dart
 import 'package:flutter/material.dart';
 
+/// Represents a menu item on the home screen with a title, description, route, and icon.
 class HomeMenuItem {
   final String title;
   final String description;
@@ -15,7 +16,9 @@ class HomeMenuItem {
   });
 }
 
+/// Model for the home screen that holds a list of available menu items.
 class HomeScreenModel {
+  // List of menu items to be displayed on the home screen.
   final List<HomeMenuItem> menuItems = [
     HomeMenuItem(
       title: 'Compare',

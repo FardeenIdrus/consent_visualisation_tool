@@ -316,7 +316,7 @@ testWidgets('3.3 Informed Consent Dialog Interaction', (WidgetTester tester) asy
   
   // Find all CheckboxListTile widgets
   final checkboxes = find.byType(CheckboxListTile);
-  expect(checkboxes, findsNWidgets(5)); // Expectthe 5 risk items
+  expect(checkboxes, findsNWidgets(5)); // Expect the 5 risk items
   
   // Tap each checkbox one by one, with pumping in between to ensure UI updates
   for (int i = 0; i < 5; i++) {

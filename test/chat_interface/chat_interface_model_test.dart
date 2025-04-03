@@ -156,7 +156,7 @@ void main() {
       model.addMessage(messageWithTimeLimit);
       expect(model.messages.length, equals(1));
       
-      // We can't call private methods directly, so we use the model's public methods
+      // Can't call private methods directly, so use the model's public methods
       // That would trigger the expirations checks
       model.notifyListeners();
     
@@ -191,7 +191,7 @@ void main() {
   group('Dynamic Consent Reassessment Dialog', () {
     testWidgets('Simulated dialog builds correctly and handles user input', (WidgetTester tester) async {
       
-      // Create atest app with a simulated reassessment dialog
+      // Create a test app with a simulated reassessment dialog
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(

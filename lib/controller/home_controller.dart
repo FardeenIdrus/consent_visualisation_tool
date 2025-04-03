@@ -7,6 +7,11 @@ import '../view/chat_interface_view.dart';
 class HomeController {
   final homeScreenModel = HomeScreenModel();
 
+
+  /// Navigates to a specific section of the app based on the provided route name.
+  /// Supported routes include '/compare' for the comparison screen and '/simulation'
+  /// for the chat simulation screen.
+
   void navigateToSection(BuildContext context, String routeName) {
     switch (routeName) {
       case '/compare':
